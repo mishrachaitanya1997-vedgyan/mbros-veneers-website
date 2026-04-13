@@ -39,6 +39,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import emailjs from '@emailjs/browser';
 
 // --- Types & Constants ---
 
@@ -62,29 +63,57 @@ const COLLECTIONS = [
     id: 'exotic',
     title: 'Exotic Burls',
     description: 'Rare burl patterns and unique grains sourced from the most remote corners of the world.',
-    image: 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=2070&auto=format&fit=crop',
+    image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/complete%20room%20with%20balcony%20view.jpeg',
     tag: 'Rare'
   },
   {
     id: 'classic',
     title: 'Heritage Oaks',
-    description: 'The foundation of luxury. Timeless European Oaks and American Walnuts.',
-    image: 'https://images.unsplash.com/photo-1541123437800-1bb1317badc2?q=80&w=2070&auto=format&fit=crop',
+    description: 'The foundation of luxury. Timeless European Oaks offering beautiful continuous wood grain.',
+    image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/brown%20wood%20textured%20veneer%20with%20light%20colored%20sofa%20in%20the%20foreground.jpeg',
     tag: 'Heritage'
   },
   {
-    id: 'smoked',
-    title: 'Smoked Eucalyptus',
-    description: 'Deep, mysterious tones achieved through precision fuming for a velvety finish.',
-    image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?q=80&w=2070&auto=format&fit=crop',
+    id: 'fluted',
+    title: 'Fluted Veneer',
+    description: 'Elegant vertical grain patterns and rich textures creating stunning interior feature walls.',
+    image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/fluted%20veneer%20.jpeg',
     tag: 'Artisanal'
   },
   {
-    id: 'dyed',
-    title: 'Architectural Dyed',
-    description: 'Consistent color saturation for large-scale modern architectural projects.',
-    image: 'https://images.unsplash.com/photo-1610557892470-55d9e80c0bce?q=80&w=2070&auto=format&fit=crop',
+    id: 'modern',
+    title: 'Architectural Light',
+    description: 'Consistent light shade veneers optimizing natural light for large-scale modern architectural projects.',
+    image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/room%20with%20light%20coming%20from%20windows%20and%20light%20shade%20veneers.jpeg',
     tag: 'Modern'
+  },
+  {
+    id: 'dark-fluted',
+    title: 'Dark Fluted Elegance',
+    description: 'A sophisticated harmony of dark fumed fluted veneer accented with light panels.',
+    image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/fluted%20dark%20colored%20veneer%20in%20the%20background%20with%20light%20colored%20veneer%20in%20the%20rest%20of%20the%20area.jpeg',
+    tag: 'Premium'
+  },
+  {
+    id: 'checkered',
+    title: 'White Checkered',
+    description: 'Bespoke checkered patterns offering a vivid and dynamic visual texture to any expanse.',
+    image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/full%20room%20view%20with%20balcone%20and%20TC%20with%20white%20chekered%20veneer%20.jpeg',
+    tag: 'Bespoke'
+  },
+  {
+    id: 'grand-lobby',
+    title: 'Grand Walnut',
+    description: 'Deep, rich dark-colored veneers perfect for wide window panes and sweeping lobbies.',
+    image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/full%20room%20view%20with%20lobby%20and%20wide%20window%20pane%20and%20dark%20colored%20veneer.jpeg',
+    tag: 'Grand'
+  },
+  {
+    id: 'contemporary',
+    title: 'Smoked Gray',
+    description: 'Subtle brownish-gray tones lending a calm, contemporary ambiance to minimalist spaces.',
+    image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/room%20with%20slight%20brownish%20gray%20veneer%20throughout%20the%20background%20and%20one%20wall%20with%20one%20side%20open%20window.jpeg',
+    tag: 'Contemporary'
   }
 ];
 
@@ -180,6 +209,8 @@ const Navbar = () => {
 };
 
 const AppointmentDialog = ({ children }: { children: React.ReactElement }) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{ type: 'success' | 'error' | null, message: string }>({ type: null, message: '' });
   const form = useForm<z.infer<typeof appointmentSchema>>({
     resolver: zodResolver(appointmentSchema),
     defaultValues: {
@@ -191,9 +222,29 @@ const AppointmentDialog = ({ children }: { children: React.ReactElement }) => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof appointmentSchema>) {
-    console.log(values);
-    alert("Appointment request sent! We will contact you shortly.");
+  async function onSubmit(values: z.infer<typeof appointmentSchema>) {
+    setIsSubmitting(true);
+    setSubmitStatus({ type: null, message: '' });
+    try {
+      await emailjs.send(
+        'service_cgxlu6r',
+        'template_fppwhse',
+        {
+          name: values.name,
+          email: values.email,
+          phone: values.phone,
+          preferred_date: values.date,
+        },
+        'NPtOCVI7yLpyBNURh'
+      );
+      setSubmitStatus({ type: 'success', message: 'Appointment request sent! We will contact you shortly.' });
+      form.reset();
+    } catch (error) {
+      console.error(error);
+      setSubmitStatus({ type: 'error', message: 'Failed to send the request, please try again.' });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -260,9 +311,14 @@ const AppointmentDialog = ({ children }: { children: React.ReactElement }) => {
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full bg-wood-dark text-wood-cream hover:bg-wood-medium rounded-none uppercase tracking-widest">
-              Confirm Request
+            <Button disabled={isSubmitting} type="submit" className="w-full bg-wood-dark text-wood-cream hover:bg-wood-medium rounded-none uppercase tracking-widest">
+              {isSubmitting ? "Sending..." : "Confirm Request"}
             </Button>
+            {submitStatus.type && (
+              <div className={`px-4 py-2 mt-4 text-sm font-medium border-l-4 ${submitStatus.type === 'success' ? 'border-green-500 text-green-700 bg-green-50' : 'border-red-500 text-red-700 bg-red-50'}`}>
+                {submitStatus.message}
+              </div>
+            )}
           </form>
         </Form>
       </DialogContent>
@@ -302,9 +358,11 @@ const Hero = () => {
               Curating the world's most prestigious wood surfaces for visionary architects and bespoke interiors.
             </p>
             <div className="flex flex-col sm:flex-row gap-6">
-              <Button className="bg-gold text-wood-dark hover:bg-white transition-all rounded-none px-10 py-8 text-sm uppercase tracking-[0.2em] font-bold shadow-2xl">
-                View Collections
-              </Button>
+              <a href="#collections">
+                <Button className="bg-gold text-wood-dark hover:bg-white transition-all rounded-none px-10 py-8 text-sm uppercase tracking-[0.2em] font-bold shadow-2xl w-full sm:w-auto">
+                  View Collections
+                </Button>
+              </a>
               <AppointmentDialog>
                 <Button variant="outline" className="border-white/60 text-white hover:bg-white hover:text-wood-dark transition-all rounded-none px-10 py-8 text-sm uppercase tracking-[0.2em] font-bold backdrop-blur-md bg-transparent">
                   Book Viewing
@@ -329,6 +387,17 @@ const Hero = () => {
 };
 
 const Collections = () => {
+  const [selectedItem, setSelectedItem] = useState<typeof COLLECTIONS[0] | null>(null);
+
+  useEffect(() => {
+    if (selectedItem) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [selectedItem]);
+
   return (
     <section id="collections" className="py-32 md:py-48 bg-wood-cream relative overflow-hidden">
       {/* Decorative background texture */}
@@ -359,10 +428,14 @@ const Collections = () => {
               transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
             >
-              <Card className="group cursor-pointer overflow-hidden border-none rounded-none bg-transparent h-full flex flex-col">
+              <Card 
+                className="group cursor-pointer overflow-hidden border-none rounded-none bg-transparent h-full flex flex-col"
+                onClick={() => setSelectedItem(item)}
+              >
                 <CardContent className="p-0 flex flex-col h-full">
                   <div className="relative aspect-[4/5] overflow-hidden mb-8 shadow-2xl shrink-0">
-                    <img 
+                    <motion.img 
+                      layoutId={`card-img-${item.id}`}
                       src={item.image} 
                       alt={item.title} 
                       className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
@@ -384,6 +457,74 @@ const Collections = () => {
           ))}
         </div>
       </div>
+
+      {/* Expanded View Lightbox */}
+      <AnimatePresence>
+        {selectedItem && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10"
+          >
+            <div 
+              className="absolute inset-0 bg-wood-dark/95 backdrop-blur-2xl cursor-zoom-out" 
+              onClick={() => setSelectedItem(null)} 
+            />
+            
+            <motion.div
+              initial={{ scale: 0.95, y: 20, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.95, y: 20, opacity: 0 }}
+              transition={{ delay: 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className="relative w-full max-w-7xl bg-wood-cream shadow-2xl flex flex-col lg:flex-row overflow-hidden z-10 max-h-[90vh]"
+            >
+              <button 
+                onClick={() => setSelectedItem(null)}
+                className="absolute top-6 right-6 z-20 w-12 h-12 bg-black/20 hover:bg-black/40 backdrop-blur-md flex items-center justify-center text-white transition-all rounded-full group outline-none"
+              >
+                <X className="w-6 h-6 group-hover:rotate-90 transition-transform duration-500" />
+              </button>
+
+              <div className="w-full lg:w-[60%] h-[40vh] lg:h-[85vh] relative overflow-hidden bg-black shrink-0">
+                <motion.img 
+                  layoutId={`card-img-${selectedItem.id}`}
+                  src={selectedItem.image} 
+                  alt={selectedItem.title} 
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+              
+              <div className="w-full lg:w-[40%] p-8 lg:p-16 flex flex-col justify-center bg-wood-cream relative h-full shrink-0 overflow-y-auto custom-scrollbar">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gold/40 to-transparent" />
+                <span className="text-gold uppercase tracking-[0.4em] text-[10px] font-bold mb-6 block">
+                  Archive No. {selectedItem.id.substring(0, 3).toUpperCase()} {new Date().getFullYear()}
+                </span>
+                <h3 className="text-4xl lg:text-6xl font-serif text-wood-dark mb-6 tracking-tight leading-tight">
+                  {selectedItem.title}
+                </h3>
+                <div className="w-12 h-[1px] bg-wood-light/30 mb-8" />
+                <p className="text-wood-medium text-lg lg:text-xl font-light leading-relaxed mb-10">
+                  {selectedItem.description}
+                </p>
+                
+                <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-wood-dark mb-12">
+                  <span className="px-4 py-2 border border-wood-light/20">{selectedItem.tag} Collection</span>
+                </div>
+
+                <a href="#contact" onClick={() => setSelectedItem(null)}>
+                  <Button className="w-full bg-wood-dark text-wood-cream hover:bg-gold hover:text-wood-dark transition-all duration-500 rounded-none py-8 uppercase tracking-[0.2em] font-bold group flex items-center justify-center gap-4">
+                    Inquire Availability
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
+                  </Button>
+                </a>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };
@@ -474,9 +615,9 @@ const Showroom = () => {
           >
             <div className="aspect-square relative z-10">
               <img 
-                src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000&auto=format&fit=crop" 
+                src="https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/complete_room.jpeg" 
                 alt="Showroom Interior" 
-                className="w-full h-full object-cover rounded-sm"
+                className="w-full h-full object-cover rounded-sm border border-wood-light/10"
                 referrerPolicy="no-referrer"
               />
             </div>
@@ -498,9 +639,10 @@ const Offers = () => {
           {/* Decorative background */}
           <div className="absolute top-0 right-0 w-1/2 h-full opacity-20">
             <img 
-              src="https://images.unsplash.com/photo-1541123437800-1bb1317badc2?q=80&w=2070&auto=format&fit=crop" 
+              src="https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/fluted%20dark%20colored%20veneer%20in%20the%20background%20with%20light%20colored%20veneer%20in%20the%20rest%20of%20the%20area.jpeg" 
               alt="Wood Texture" 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover grayscale opacity-50 mix-blend-overlay"
+              referrerPolicy="no-referrer"
             />
           </div>
           
@@ -527,6 +669,8 @@ const Offers = () => {
 };
 
 const ContactSection = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<{ type: 'success' | 'error' | null, message: string }>({ type: null, message: '' });
   const form = useForm<z.infer<typeof contactSchema>>({
     resolver: zodResolver(contactSchema),
     defaultValues: {
@@ -537,9 +681,29 @@ const ContactSection = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof contactSchema>) {
-    console.log(values);
-    alert("Message sent! We will get back to you soon.");
+  async function onSubmit(values: z.infer<typeof contactSchema>) {
+    setIsSubmitting(true);
+    setSubmitStatus({ type: null, message: '' });
+    try {
+      await emailjs.send(
+        'service_cgxlu6r',
+        'template_5i87ik5',
+        {
+          name: values.name,
+          email: values.email,
+          subject: values.subject,
+          message: values.message,
+        },
+        'NPtOCVI7yLpyBNURh'
+      );
+      setSubmitStatus({ type: 'success', message: 'Message sent! We will get back to you soon.' });
+      form.reset();
+    } catch (error) {
+      console.error(error);
+      setSubmitStatus({ type: 'error', message: 'Failed to send the message, please try again.' });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -611,9 +775,16 @@ const ContactSection = () => {
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-full md:w-auto bg-wood-dark text-wood-cream hover:bg-wood-medium rounded-none px-12 py-6 uppercase tracking-widest font-bold">
-                    Send Message
-                  </Button>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <Button disabled={isSubmitting} type="submit" className="w-full md:w-auto bg-wood-dark text-wood-cream hover:bg-wood-medium rounded-none px-12 py-6 uppercase tracking-widest font-bold">
+                      {isSubmitting ? "Sending..." : "Send Message"}
+                    </Button>
+                    {submitStatus.type && (
+                      <div className={`px-4 py-2 text-sm font-medium border-l-4 ${submitStatus.type === 'success' ? 'border-green-500 text-green-700 bg-green-50' : 'border-red-500 text-red-700 bg-red-50'}`}>
+                        {submitStatus.message}
+                      </div>
+                    )}
+                  </div>
                 </form>
               </Form>
             </div>
@@ -626,7 +797,7 @@ const ContactSection = () => {
                     <Phone className="text-gold shrink-0 mt-1" size={20} />
                     <div>
                       <p className="text-xs uppercase tracking-widest text-wood-medium mb-1">Call Us</p>
-                      <p className="text-wood-dark font-medium">+91 98230 00000</p>
+                      <p className="text-wood-dark font-medium">+91 99221 66866</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
