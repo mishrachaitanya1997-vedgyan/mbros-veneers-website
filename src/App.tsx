@@ -840,6 +840,62 @@ const ContactSection = () => {
   );
 };
 
+const PrivacyDialog = ({ children }: { children: React.ReactElement }) => {
+  return (
+    <Dialog>
+      <DialogTrigger render={children} />
+      <DialogContent className="w-[95vw] md:max-w-4xl lg:max-w-5xl xl:max-w-6xl max-h-[85vh] overflow-y-auto bg-wood-cream border-wood-light/20 custom-scrollbar p-6 md:p-12 lg:p-20 transition-all duration-500">
+        <DialogHeader className="mb-10">
+          <DialogTitle className="font-serif text-3xl md:text-5xl lg:text-6xl text-wood-dark mb-4 leading-tight">Privacy Policy</DialogTitle>
+          <DialogDescription className="text-wood-medium text-lg">
+            How we protect your experience at M Bros Veneers.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-12 text-wood-dark font-light leading-relaxed py-8">
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <h4 className="font-serif text-2xl text-wood-dark font-bold">Our Commitment</h4>
+            <p className="md:col-span-2 text-lg">At M Bros Veneers, we understand that luxury is built on trust. We are dedicated to protecting the personal information you share with us through our website and our Nagpur showroom.</p>
+          </section>
+
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <h4 className="font-serif text-2xl text-wood-dark font-bold">Information We Collect</h4>
+            <div className="md:col-span-2 space-y-4">
+              <p className="text-lg">We only collect information that helps us serve you better, specifically:</p>
+              <ul className="list-disc pl-5 space-y-2 text-lg">
+                <li><strong>Personal Details:</strong> Your name, email address, and phone number when booking a private viewing or inquiring about our collections.</li>
+                <li><strong>Interaction Data:</strong> Basic technical details about your visit to help us improve our website experience.</li>
+              </ul>
+            </div>
+          </section>
+
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <h4 className="font-serif text-2xl text-wood-dark font-bold">How We Use Your Data</h4>
+            <p className="md:col-span-2 text-lg">Your information is used exclusively to coordinate your showroom visits and respond to your architectural requirements. We do not sell, rent, or trade your personal data with any third parties.</p>
+          </section>
+
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <h4 className="font-serif text-2xl text-wood-dark font-bold">Security & Storage</h4>
+            <p className="md:col-span-2 text-lg">We use industry-standard security measures to ensure your data is handled safely. Requests are processed securely and your information is only accessible to authorized team members assisting with your project.</p>
+          </section>
+
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <h4 className="font-serif text-2xl text-wood-dark font-bold">Contact Us</h4>
+            <div className="md:col-span-2">
+              <p className="text-lg mb-6">If you have any questions about our privacy practices, or if you would like to update or remove your information from our records, please reach out to our team:</p>
+              <div className="p-8 bg-wood-dark text-wood-cream border-l-4 border-gold">
+                <p className="font-serif text-2xl text-gold mb-2">M Bros Veneers</p>
+                <p className="text-lg">81, Queta Colony, Lakadganj, Nagpur</p>
+                <p className="text-lg">Maharashtra, India - 440008</p>
+                <p className="mt-4 text-gold text-lg">Email: info@mbrosveneers.com</p>
+              </div>
+            </div>
+          </section>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 const Footer = () => {
   return (
     <footer className="bg-wood-cream border-t border-wood-light/20 pt-20 pb-10">
@@ -869,7 +925,13 @@ const Footer = () => {
               <li><a href="#collections" className="hover:text-gold transition-colors">Collections</a></li>
               <li><a href="#showroom" className="hover:text-gold transition-colors">Showroom</a></li>
               <li><a href="#contact" className="hover:text-gold transition-colors">Contact</a></li>
-              <li><a href="#" className="hover:text-gold transition-colors">Privacy Policy</a></li>
+              <li>
+                <PrivacyDialog>
+                  <button className="hover:text-gold transition-colors p-0 h-auto bg-transparent border-none cursor-pointer">
+                    Privacy Policy
+                  </button>
+                </PrivacyDialog>
+              </li>
             </ul>
           </div>
 
