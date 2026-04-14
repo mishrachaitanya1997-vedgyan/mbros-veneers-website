@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
+import Catalogue from './Catalogue';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Menu, 
@@ -131,6 +132,7 @@ const Navbar = () => {
 
   const navLinks = [
     { name: 'Home', href: '#' },
+    { name: 'Catalogue', href: '#/catalogue' },
     { name: 'Collections', href: '#collections' },
     { name: 'Showroom', href: '#showroom' },
     { name: 'Contact', href: '#contact' },
@@ -414,9 +416,11 @@ const Collections = () => {
               Our gallery features over 200+ varieties of natural wood veneers, each hand-selected for its unique character and architectural potential.
             </p>
           </div>
-          <Button variant="link" className="text-wood-dark p-0 h-auto uppercase tracking-[0.2em] text-xs font-bold group">
-            View Full Catalog <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-2" />
-          </Button>
+          <a href="#/catalogue">
+            <Button variant="link" className="text-wood-dark p-0 h-auto uppercase tracking-[0.2em] text-xs font-bold group">
+              View Full Catalog <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-2" />
+            </Button>
+          </a>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
@@ -961,17 +965,35 @@ const Footer = () => {
 };
 
 export default function App() {
+  const [currentPath, setCurrentPath] = useState(window.location.hash);
+
+  useEffect(() => {
+    const onHashChange = () => {
+      setCurrentPath(window.location.hash);
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  const isCatalogue = currentPath.startsWith('#/catalogue');
+
   return (
     <div className="min-h-screen selection:bg-gold selection:text-wood-dark">
-      <Navbar />
-      <main>
-        <Hero />
-        <Collections />
-        <Offers />
-        <Showroom />
-        <ContactSection />
-      </main>
-      <Footer />
+      {!isCatalogue && <Navbar />}
+      {isCatalogue ? (
+        <Catalogue />
+      ) : (
+        <>
+          <main>
+            <Hero />
+            <Collections />
+            <Offers />
+            <Showroom />
+            <ContactSection />
+          </main>
+          <Footer />
+        </>
+      )}
     </div>
   );
 }
