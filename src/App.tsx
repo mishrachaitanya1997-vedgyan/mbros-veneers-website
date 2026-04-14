@@ -619,8 +619,8 @@ const Showroom = () => {
           >
             <div className="aspect-square relative z-10">
               <img 
-                src="https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/complete_room.jpeg" 
-                alt="Showroom Interior" 
+                src="https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/showroom_images/DSC06721.JPG" 
+                alt="M Bros Veneers Showroom Exterior" 
                 className="w-full h-full object-cover rounded-sm border border-wood-light/10"
                 referrerPolicy="no-referrer"
               />
@@ -630,6 +630,52 @@ const Showroom = () => {
             <div className="absolute -bottom-10 -left-10 w-64 h-64 bg-wood-medium/30 z-0" />
           </motion.div>
         </div>
+      </div>
+    </section>
+  );
+};
+
+const ShowroomGallery = () => {
+  const images = [
+    "https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/showroom_images/IMG_5678.JPG",
+    "https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/showroom_images/IMG_5665.JPG",
+    "https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/showroom_images/IMG_5680.JPG",
+    "https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/showroom_images/DSC06641.JPG",
+    "https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/showroom_images/IMG_5679.JPG",
+    "https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/showroom_images/IMG_5688.JPG"
+  ];
+
+  return (
+    <section className="py-20 bg-wood-dark overflow-hidden border-t border-wood-light/10">
+      <div className="container mx-auto px-6 mb-12">
+        <span className="text-gold uppercase tracking-[0.4em] text-[10px] font-bold block text-center">Inside The Gallery</span>
+      </div>
+      <div className="relative w-full flex overflow-x-hidden">
+        <motion.div 
+          className="flex whitespace-nowrap gap-6 px-3"
+          animate={{ x: ["0%", "-50%"] }}
+          transition={{
+            repeat: Infinity,
+            ease: "linear",
+            duration: 40,
+          }}
+        >
+          {/* Duplicate images array to create seamless loop */}
+          {[...images, ...images].map((img, index) => (
+            <div 
+              key={index} 
+              className="relative w-[300px] md:w-[450px] lg:w-[600px] aspect-[4/3] shrink-0 overflow-hidden bg-black rounded-sm group"
+            >
+              <img 
+                src={img} 
+                alt={`Showroom View ${index + 1}`} 
+                className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110 opacity-80 group-hover:opacity-100"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors duration-500" />
+            </div>
+          ))}
+        </motion.div>
       </div>
     </section>
   );
@@ -666,6 +712,59 @@ const Offers = () => {
               <span className="text-gold font-serif italic text-xl">Up to 15% off for architects</span>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const CuratedPalettes = () => {
+  const pallets = [
+    "https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/pallets/8c18080c-d49a-4f71-9a4f-ed9a0c72ab2e.jpg",
+    "https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/pallets/DSC06764.JPG",
+    "https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/pallets/DSC06783.JPG",
+    "https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/pallets/IMG_5695.JPG"
+  ];
+  
+  return (
+    <section className="py-24 md:py-32 bg-wood-cream border-t border-wood-light/10 overflow-hidden">
+      <div className="container mx-auto px-6">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+          <div className="max-w-2xl">
+            <span className="text-wood-medium uppercase tracking-[0.3em] text-xs font-bold mb-4 block">Endless Possibilities</span>
+            <h2 className="text-4xl md:text-5xl font-serif text-wood-dark mb-6">
+              Bespoke <span className="italic">Palettes</span>
+            </h2>
+            <p className="text-wood-medium text-lg font-light leading-relaxed">
+              Discover a spectrum of hues, grains, and finishes. Our comprehensive swatches allow visionaries to perfectly match any aesthetic requirement in person.
+            </p>
+          </div>
+          <a href="#/catalogue">
+            <Button variant="outline" className="border-wood-dark text-wood-dark hover:bg-wood-dark hover:text-wood-cream transition-all rounded-none px-8 py-6 text-xs uppercase tracking-[0.2em] font-bold">
+              Explore Full Catalog
+            </Button>
+          </a>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {pallets.map((img, idx) => (
+             <motion.div
+               key={idx}
+               initial={{ opacity: 0, scale: 0.95 }}
+               whileInView={{ opacity: 1, scale: 1 }}
+               transition={{ duration: 0.8, delay: idx * 0.15 }}
+               viewport={{ once: true }}
+               className="group relative w-full aspect-[4/3] overflow-hidden bg-wood-dark rounded-sm shadow-xl"
+             >
+               <img 
+                 src={img} 
+                 alt={`Curated Palette ${idx + 1}`} 
+                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-90 group-hover:opacity-100"
+                 referrerPolicy="no-referrer"
+               />
+               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
+             </motion.div>
+          ))}
         </div>
       </div>
     </section>
@@ -989,6 +1088,8 @@ export default function App() {
             <Collections />
             <Offers />
             <Showroom />
+            <ShowroomGallery />
+            <CuratedPalettes />
             <ContactSection />
           </main>
           <Footer />
