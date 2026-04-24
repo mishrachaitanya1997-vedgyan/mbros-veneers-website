@@ -17,6 +17,8 @@ const CATALOGUE_ITEMS = [
   { id: 'cat-10', title: 'Noir Etched Wood', tag: 'Etched', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/DSC05814.JPG' },
   { id: 'cat-11', title: 'Geometric Array', tag: 'Bespoke', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/DSC06765.JPG' },
   { id: 'cat-12', title: 'Veneer Swatch Collection', tag: 'Reference', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/C1311FB5-0B7A-4C65-B51D-A9E9F996F3A6.jpg' },
+  { id: 'cat-13', title: 'Textured Charcoal (Applied)', tag: 'Textured', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/textured-charcoal-applied.jpeg' },
+  { id: 'cat-14', title: 'Textured Charcoal (Raw)', tag: 'Textured', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/textured-charcoal-raw.jpeg' },
 ];
 
 export default function Catalogue() {
@@ -105,7 +107,7 @@ export default function Catalogue() {
               </div>
 
               <div className="flex flex-col">
-                <span className="text-wood-medium text-xs font-serif italic mb-2">No. {String(index + 1).padStart(2, '0')}</span>
+                <span className="text-wood-light text-xs font-serif italic mb-2">No. {String(index + 1).padStart(2, '0')}</span>
                 <h3 className="text-2xl font-serif text-white tracking-wide group-hover:text-gold transition-colors duration-300">
                   {item.title}
                 </h3>
