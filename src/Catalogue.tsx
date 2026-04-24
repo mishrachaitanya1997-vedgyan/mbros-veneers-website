@@ -44,6 +44,15 @@ export default function Catalogue() {
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-8">
           <div className="max-w-3xl">
+            <div className="mb-10">
+              <a href="#/">
+                <img 
+                  src="https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/logo/M%20BROS%20VENEERS%20%26%20PLY%20LOGO.PNG" 
+                  alt="M Bros Veneers Logo" 
+                  className="h-16 object-contain"
+                />
+              </a>
+            </div>
             <a href="#/" className="inline-flex items-center gap-2 text-wood-medium hover:text-gold transition-colors text-sm uppercase tracking-widest font-medium mb-8 group">
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
               Back to Home

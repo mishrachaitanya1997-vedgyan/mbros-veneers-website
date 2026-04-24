@@ -141,16 +141,12 @@ const Navbar = () => {
   return (
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'bg-wood-cream/95 backdrop-blur-md py-3 shadow-md' : 'bg-transparent py-8'}`}>
       <div className="container mx-auto px-6 flex justify-between items-center">
-        <a href="#" className="flex items-center gap-3 shrink-0">
-          <div className="w-10 h-10 bg-wood-dark flex items-center justify-center rounded-sm shadow-lg">
-            <span className="text-wood-cream font-serif text-xl font-bold">M</span>
-          </div>
-          <div className="flex flex-col leading-none">
-            <span className={`text-xl md:text-2xl font-serif font-bold tracking-tight ${isScrolled ? 'text-wood-dark' : 'text-white'}`}>
-              M BROS
-            </span>
-            <span className="text-[10px] uppercase tracking-[0.4em] text-gold font-bold">VENEERS</span>
-          </div>
+        <a href="#" className="flex items-center shrink-0">
+          <img 
+            src="https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/logo/M%20BROS%20VENEERS%20%26%20PLY%20LOGO.PNG" 
+            alt="M Bros Veneers Logo" 
+            className={`transition-all duration-500 ${isScrolled ? 'h-10' : 'h-16'} object-contain`}
+          />
         </a>
 
         {/* Desktop Nav */}
@@ -1005,13 +1001,12 @@ const Footer = () => {
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-8 h-8 bg-wood-dark flex items-center justify-center rounded-sm">
-                <span className="text-wood-cream font-serif text-lg font-bold">M</span>
-              </div>
-              <span className="text-xl font-serif font-bold tracking-tight text-wood-dark">
-                M BROS <span className="text-gold">VENEERS</span>
-              </span>
+            <div className="flex items-center mb-6">
+              <img 
+                src="https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/logo/M%20BROS%20VENEERS%20%26%20PLY%20LOGO.PNG" 
+                alt="M Bros Veneers Logo" 
+                className="h-24 md:h-32 object-contain"
+              />
             </div>
             <p className="text-wood-medium max-w-md mb-8 leading-relaxed">
               Nagpur's premier destination for luxury wood veneers. We bring the world's finest timber textures to your doorstep, ensuring every architectural vision is realized with perfection.
