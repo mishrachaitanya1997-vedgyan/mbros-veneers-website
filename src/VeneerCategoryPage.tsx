@@ -29,6 +29,7 @@ const CATEGORY_CONFIG = {
     ],
     faqs: [
       { q: 'What is burl wood veneer?', a: 'Burl veneer is cut from abnormal rounded growths on tree trunks, producing unique swirling grain patterns found nowhere else in nature. No two burl veneer sheets are identical, making them highly prized for luxury interiors.' },
+      { q: 'What is the difference between veneer and laminate?', a: 'Wood veneer is a real, thin slice of natural wood bonded to a substrate. Laminate is a synthetic material printed to mimic wood. Veneer offers genuine grain warmth, aging character, and is more environmentally sustainable than laminate.' },
       { q: 'Where can I buy burl wood veneer in Nagpur?', a: 'M Bros Veneers at 81, Queta Colony, Lakadganj, Nagpur stocks one of the largest collections of exotic burl wood veneers in Central India. Visit our showroom Monday–Saturday, 10 AM–8 PM.' },
     ],
   },
@@ -48,6 +49,8 @@ const CATEGORY_CONFIG = {
     ],
     faqs: [
       { q: 'What is teak wood veneer used for?', a: 'Teak veneer is widely used for wall panelling, furniture surfaces, cabinet doors, flooring overlays, and interior accent features. It provides the warmth and natural grain of solid teak at a fraction of the cost.' },
+      { q: 'How do I choose the best veneer for furniture?', a: 'For furniture, choose a veneer with consistent grain and no knots for a clean look. Teak veneer is excellent for durability; oak for a classic feel. Always request a physical swatch from our Nagpur showroom before committing.' },
+      { q: 'Veneer vs plywood — what is the difference?', a: 'Plywood is a structural board made of multiple wood layers. Veneer is a decorative surface material applied over plywood or MDF. Veneers give plywood furniture the look of solid wood at a much lower cost and weight.' },
       { q: 'Where can I buy teak veneer sheets in Nagpur?', a: 'M Bros Veneers stocks premium natural teak veneer sheets at our Lakadganj showroom in Nagpur, available for architects, interior designers, and individual buyers.' },
     ],
   },
@@ -67,7 +70,9 @@ const CATEGORY_CONFIG = {
     ],
     faqs: [
       { q: 'What types of oak veneer are available in Nagpur?', a: 'At M Bros Veneers Nagpur, we stock European oak in multiple finishes including dark fumed oak, natural ash, smoked oak, and Nordic charcoal — suitable for both classic and contemporary interior styles.' },
+      { q: 'How do I maintain wood veneer sheets?', a: 'Clean wood veneer with a soft, slightly damp cloth. Avoid harsh chemicals, excess moisture, and direct sunlight. Use a quality wood oil or polish every 6–12 months to preserve the finish. Properly maintained veneer can last decades.' },
       { q: 'Is oak veneer suitable for wall panelling?', a: 'Yes. Oak veneer is one of the most popular choices for interior wall panelling due to its clean grain, durability, and ability to complement a wide range of design styles from traditional to modern minimalist.' },
+      { q: 'What is the difference between veneer and laminate for doors?', a: 'Veneer-covered doors use a real wood surface that can be sanded, re-polished, and refinished. Laminate doors have a plastic surface that cannot be restored once scratched. Veneer is the premium, longer-lasting choice for doors and cabinetry.' },
     ],
   },
 } satisfies Record<CategorySlug, {

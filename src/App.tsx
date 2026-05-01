@@ -391,14 +391,14 @@ const Hero = () => {
             transition={{ duration: 1, ease: "easeOut" }}
           >
             <span className="text-gold uppercase tracking-[0.5em] text-xs font-bold mb-6 block">
-              The Art of Fine Timber • Nagpur
+              Veneer Showroom • Lakadganj, Nagpur
             </span>
             <h1 className="text-6xl md:text-9xl font-serif text-white leading-[0.9] mb-10 premium-text-shadow">
-              Exotic <br />
+              Wood <br />
               <span className="italic text-gold">Veneers</span>
             </h1>
             <p className="text-lg md:text-2xl text-white/90 mb-12 font-light max-w-2xl leading-relaxed">
-              Nagpur's premier supplier of exotic wood veneers in Nagpur — natural veneer sheets, decorative veneer supplier, and bespoke architectural surfaces for India's finest interiors.
+              Nagpur's best veneer shop for natural and decorative veneer sheets — teak, oak, burl, walnut, and fluted panels. Trusted by architects and interior designers across Central India.
             </p>
             <div className="flex flex-col sm:flex-row gap-6">
               <a href="#collections">
@@ -449,12 +449,12 @@ const Collections = () => {
       <div className="container mx-auto px-6 relative z-10">
         <div className="flex flex-col md:flex-row justify-between items-end mb-24 gap-8">
           <div className="max-w-3xl">
-            <span className="text-wood-medium uppercase tracking-[0.3em] text-xs font-bold mb-4 block">Curated Selection</span>
+            <span className="text-wood-medium uppercase tracking-[0.3em] text-xs font-bold mb-4 block">Veneer Collections — Nagpur</span>
             <h2 className="text-5xl md:text-7xl font-serif text-wood-dark mb-8">
-              Exotic <span className="italic">Masterpieces</span>
+              Natural <span className="italic">Veneer Sheets</span>
             </h2>
             <p className="text-wood-medium text-xl font-light leading-relaxed">
-              Nagpur's largest curated selection of exotic wood veneers — over 200 varieties including rare burls, heritage oaks, teak, fluted panels, and smoked walnut. Each piece hand-selected for architectural excellence.
+              India's most curated selection of decorative veneer sheets — teak, oak, walnut, burl, and fluted panels. Over 200 varieties in our Nagpur showroom, each hand-picked for quality and character. Available for furniture makers, interior designers, architects, and bulk orders.
             </p>
           </div>
           <a href="/catalogue">
@@ -610,8 +610,8 @@ const Showroom = () => {
                   <Trees className="text-gold" size={24} />
                 </div>
                 <div>
-                  <h4 className="font-serif text-xl mb-1">200+ Varieties</h4>
-                  <p className="text-wood-light text-sm">The largest collection in Central India.</p>
+                  <h4 className="font-serif text-xl mb-1">200+ Veneer Varieties</h4>
+                  <p className="text-wood-light text-sm">Teak, oak, walnut, burl, fluted &amp; exotic — Central India's largest natural veneer collection.</p>
                 </div>
               </div>
               <div className="flex gap-4">
@@ -619,8 +619,8 @@ const Showroom = () => {
                   <ShieldCheck className="text-gold" size={24} />
                 </div>
                 <div>
-                  <h4 className="font-serif text-xl mb-1">Quality Assured</h4>
-                  <p className="text-wood-light text-sm">Sourced from sustainable forests.</p>
+                  <h4 className="font-serif text-xl mb-1">Premium Quality</h4>
+                  <p className="text-wood-light text-sm">Premium veneer sheets sourced from certified, sustainable forests worldwide.</p>
                 </div>
               </div>
               <div className="flex gap-4">
@@ -629,7 +629,7 @@ const Showroom = () => {
                 </div>
                 <div>
                   <h4 className="font-serif text-xl mb-1">Expert Guidance</h4>
-                  <p className="text-wood-light text-sm">Consultation for architects & designers.</p>
+                  <p className="text-wood-light text-sm">Dedicated support for architects, interior designers &amp; commercial veneer buyers.</p>
                 </div>
               </div>
               <div className="flex gap-4">
@@ -637,8 +637,8 @@ const Showroom = () => {
                   <Clock className="text-gold" size={24} />
                 </div>
                 <div>
-                  <h4 className="font-serif text-xl mb-1">30 Years Legacy</h4>
-                  <p className="text-wood-light text-sm">Trusted by generations in Nagpur.</p>
+                  <h4 className="font-serif text-xl mb-1">30+ Years in Nagpur</h4>
+                  <p className="text-wood-light text-sm">Nagpur's most trusted natural veneer dealer since 1990.</p>
                 </div>
               </div>
             </div>
@@ -762,13 +762,13 @@ const Offers = () => {
           </div>
           
           <div className="relative z-10 max-w-2xl">
-            <span className="text-gold uppercase tracking-[0.4em] text-xs font-bold mb-6 block">Seasonal Curation</span>
+            <span className="text-gold uppercase tracking-[0.4em] text-xs font-bold mb-6 block">New Arrivals — Burl Veneer Sheets</span>
             <h2 className="text-4xl md:text-6xl font-serif mb-8 leading-tight">
               The <span className="italic">Spring</span> <br />
               Burl Collection
             </h2>
             <p className="text-wood-light text-lg mb-10 font-light leading-relaxed">
-              Exclusive early access to our newly arrived Italian Walnut burls. Limited stock available for bespoke architectural projects.
+              Exclusive early access to our newly arrived Italian Walnut burl veneer sheets — one of the rarest decorative veneers available in India. Limited stock for bespoke architectural projects. Architects receive up to 15% off on bulk orders.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
               <a href="#contact">
@@ -776,7 +776,9 @@ const Offers = () => {
                   Inquire Now
                 </Button>
               </a>
-              <span className="text-gold font-serif italic text-xl">Up to 15% off for architects</span>
+              <a href="/veneers/burl" onClick={(e) => { e.preventDefault(); navigate('/veneers/burl'); }} className="text-gold font-serif italic text-xl hover:underline">
+                View Burl Catalogue →
+              </a>
             </div>
           </div>
         </div>
@@ -798,12 +800,12 @@ const CuratedPalettes = () => {
       <div className="container mx-auto px-6">
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
           <div className="max-w-2xl">
-            <span className="text-wood-medium uppercase tracking-[0.3em] text-xs font-bold mb-4 block">Endless Possibilities</span>
+            <span className="text-wood-medium uppercase tracking-[0.3em] text-xs font-bold mb-4 block">Veneer Finishes &amp; Applications</span>
             <h2 className="text-4xl md:text-5xl font-serif text-wood-dark mb-6">
-              Bespoke <span className="italic">Palettes</span>
+              Decorative <span className="italic">Veneer Panels</span>
             </h2>
             <p className="text-wood-medium text-lg font-light leading-relaxed">
-              Discover a spectrum of hues, grains, and finishes. Our comprehensive swatches allow visionaries to perfectly match any aesthetic requirement in person.
+              Explore the full spectrum of decorative wall veneer panels, veneer sheets for doors, veneer sheets for cabinets, and bespoke furniture surfaces. Visit our Nagpur showroom to see every finish in person before you decide.
             </p>
           </div>
           <a href="/catalogue">
@@ -834,6 +836,168 @@ const CuratedPalettes = () => {
                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
              </motion.div>
           ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const HomeFAQ = () => {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const faqs = [
+    {
+      q: 'What is wood veneer?',
+      a: 'Wood veneer is a thin, precision-cut slice of real natural wood — typically 0.5mm to 3mm thick — bonded to a substrate such as MDF or plywood. It delivers the warmth, grain, and character of solid timber at a fraction of the weight and cost, making it the preferred choice of architects and interior designers worldwide.',
+    },
+    {
+      q: 'What types of wood veneer sheets do you stock?',
+      a: 'Our Nagpur showroom carries over 200 varieties of natural veneer sheets including teak veneer, oak veneer, walnut veneer, burl wood veneer, smoked walnut, fluted veneer panels, Nordic charcoal, wenge, and a full range of exotic and architectural veneers. Every piece is hand-selected for consistency and quality.',
+    },
+    {
+      q: 'Where is your veneer showroom located in Nagpur?',
+      a: 'M Bros Veneers is located at 81, Queta Colony, Lakadganj, Nagpur — 440008, Maharashtra. We are conveniently accessible from Sitabuldi, Dharampeth, and central Nagpur. Open Monday to Saturday, 10:00 AM to 8:00 PM. Sundays by appointment only.',
+    },
+    {
+      q: 'What is the difference between veneer and laminate?',
+      a: 'Veneer is a real wood surface — it ages gracefully, can be re-sanded and re-polished, and carries the natural warmth only genuine timber offers. Laminate is a synthetic material with a printed wood pattern. For premium furniture, doors, cabinets, and feature walls, veneer is the material of distinction.',
+    },
+    {
+      q: 'Can I use veneer sheets for furniture and cabinets?',
+      a: 'Absolutely. Veneer sheets are ideal for furniture surfaces, cabinet fronts, wardrobe shutters, and bespoke joinery. Teak, oak, and walnut veneer are especially popular for furniture-grade applications. Visit our showroom to choose from physical swatches before placing your order.',
+    },
+    {
+      q: 'Can I visit the showroom to see veneer samples in person?',
+      a: 'Yes — and we strongly encourage it. The true character of a wood veneer is best experienced in person: the grain depth, the surface texture, the way light plays across it. Visit us at Lakadganj, Nagpur, Monday to Saturday. For architects and designers with large requirements, private viewings can be arranged.',
+    },
+    {
+      q: 'Do you supply bulk veneer sheets for commercial projects?',
+      a: 'Yes. We are a trusted commercial veneer supplier across Central India, regularly supplying bulk veneer sheets to hotel groups, corporate fit-out contractors, residential developers, and large-scale interior projects. Contact us with your project specifications for a tailored quote.',
+    },
+    {
+      q: 'Do you work with architects and interior designers?',
+      a: 'Veneer selection is a core part of our offering for the design community. We work closely with architects, interior designers, and specification consultants to source the right veneer for each project. We offer expert material guidance, sample packs, and dedicated support throughout your project.',
+    },
+    {
+      q: 'How do I choose the right veneer for my project?',
+      a: 'Start with the setting: lighter veneers like ash and oak work well in spaces with natural light; dark veneers like fumed oak or smoked walnut add depth in statement rooms. Consider the application — furniture, wall panels, or doors — and always evaluate a physical swatch in the actual lighting of your space. Our team is available to advise.',
+    },
+    {
+      q: 'How do I get a price for wood veneer sheets in Nagpur?',
+      a: 'Pricing depends on species, grade, sheet size, and quantity. We offer competitive rates for both retail and bulk orders. Visit our Nagpur showroom or send us your project brief via the contact form below — our team will respond within 24 hours with a detailed quote.',
+    },
+  ];
+
+  return (
+    <section className="py-32 md:py-48 bg-wood-cream border-t border-wood-light/20" aria-labelledby="faq-heading">
+      <div className="container mx-auto px-6">
+        <div className="max-w-4xl mx-auto">
+
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="mb-20 text-center"
+          >
+            <span className="text-wood-medium uppercase tracking-[0.4em] text-xs font-bold mb-6 block">
+              Expert Knowledge
+            </span>
+            <h2 id="faq-heading" className="text-5xl md:text-6xl font-serif text-wood-dark mb-6">
+              Frequently Asked <span className="italic">Questions</span>
+            </h2>
+            <p className="text-wood-medium text-lg font-light max-w-xl mx-auto leading-relaxed">
+              Everything you need to know about sourcing premium wood veneer sheets from our Nagpur showroom.
+            </p>
+          </motion.div>
+
+          {/* FAQ accordion */}
+          <div>
+            {faqs.map((faq, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.04 }}
+                viewport={{ once: true }}
+                className="border-t border-wood-light/20 last:border-b last:border-wood-light/20"
+              >
+                <button
+                  onClick={() => setOpenIndex(openIndex === index ? null : index)}
+                  className="w-full flex items-center justify-between py-8 text-left group"
+                  aria-expanded={openIndex === index}
+                  aria-controls={`faq-answer-${index}`}
+                >
+                  <div className="flex items-start gap-8 pr-8">
+                    <span className="text-gold font-serif text-sm shrink-0 mt-1 select-none" aria-hidden="true">
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
+                    <h3 className="font-serif text-xl md:text-2xl text-wood-dark group-hover:text-wood-medium transition-colors duration-300 leading-snug">
+                      {faq.q}
+                    </h3>
+                  </div>
+                  <div
+                    className={`w-10 h-10 shrink-0 border flex items-center justify-center transition-all duration-300 ${
+                      openIndex === index
+                        ? 'bg-wood-dark border-wood-dark'
+                        : 'bg-transparent border-wood-light/40 group-hover:border-gold'
+                    }`}
+                    aria-hidden="true"
+                  >
+                    <span
+                      className={`text-xl leading-none font-light transition-colors duration-300 ${
+                        openIndex === index ? 'text-gold' : 'text-wood-dark'
+                      }`}
+                    >
+                      {openIndex === index ? '−' : '+'}
+                    </span>
+                  </div>
+                </button>
+
+                <AnimatePresence initial={false}>
+                  {openIndex === index && (
+                    <motion.div
+                      id={`faq-answer-${index}`}
+                      key="answer"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <div className="flex gap-8 pb-10">
+                        {/* Spacer matching number column */}
+                        <span className="text-sm shrink-0 opacity-0 select-none" aria-hidden="true">00</span>
+                        <p className="text-wood-medium text-lg font-light leading-relaxed">
+                          {faq.a}
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Bottom CTA */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="mt-16 pt-16 border-t border-wood-light/20 flex flex-col sm:flex-row items-center justify-between gap-8"
+          >
+            <p className="font-serif text-2xl md:text-3xl text-wood-dark italic">
+              Still have questions?
+            </p>
+            <a href="#contact">
+              <Button className="bg-wood-dark text-wood-cream hover:bg-gold hover:text-wood-dark transition-all duration-300 rounded-none px-10 py-6 uppercase tracking-[0.2em] text-xs font-bold">
+                Speak to an Expert
+              </Button>
+            </a>
+          </motion.div>
+
         </div>
       </div>
     </section>
@@ -883,9 +1047,10 @@ const ContactSection = () => {
       <div className="container mx-auto px-6">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-16">
+            <span className="text-wood-medium uppercase tracking-[0.3em] text-xs font-bold mb-4 block">Veneer Showroom Near Me — Nagpur</span>
             <h2 className="text-4xl md:text-6xl font-serif text-wood-dark mb-6">Get in <span className="italic">Touch</span></h2>
             <p className="text-wood-medium max-w-2xl mx-auto">
-              Have a specific requirement or want to inquire about a collection? Fill out the form below and our experts will assist you.
+              Looking for a veneer supplier near you in Nagpur? Visit our showroom at Lakadganj — close to Sitabuldi and Dharampeth — or send us your project requirements and we'll respond within 24 hours.
             </p>
           </div>
 
@@ -1165,18 +1330,17 @@ export default function App() {
     const ogDesc = document.querySelector('meta[property="og:description"]') as HTMLMetaElement | null;
 
     if (isCatalogue) {
-      document.title = 'Master Catalogue | M Bros Veneers — Wood Veneers Nagpur';
+      document.title = 'Natural Veneer Sheets India | M Bros Veneers Catalogue';
       if (canonical) canonical.href = 'https://mbrosveneers.com/catalogue';
       if (ogUrl) ogUrl.content = 'https://mbrosveneers.com/catalogue';
-      if (ogTitle) ogTitle.content = 'Master Catalogue | M Bros Veneers — Wood Veneers Nagpur';
-      if (ogDesc) ogDesc.content = 'Browse 200+ natural wood veneer sheets at M Bros Veneers Nagpur — exotic burls, teak, oak, fluted veneers, and more.';
+      if (ogTitle) ogTitle.content = 'Natural Veneer Sheets India | M Bros Veneers Catalogue';
+      if (ogDesc) ogDesc.content = 'Browse 200+ premium wood veneer sheets: teak, oak, walnut, burl, fluted & exotic. India\'s trusted decorative veneer supplier. Order from Nagpur.';
     } else if (!isVeneerPage) {
-      // Homepage — VeneerCategoryPage handles its own meta
-      document.title = 'M Bros Veneers | Exotic & Luxury Wood Veneers in Nagpur';
+      document.title = 'Wood Veneers in Nagpur | M Bros Veneers Showroom';
       if (canonical) canonical.href = 'https://mbrosveneers.com/';
       if (ogUrl) ogUrl.content = 'https://mbrosveneers.com/';
-      if (ogTitle) ogTitle.content = 'M Bros Veneers | Exotic & Luxury Wood Veneers in Nagpur';
-      if (ogDesc) ogDesc.content = "Nagpur's premier veneer gallery. Discover 200+ varieties of natural, exotic, and luxury wood veneers for bespoke architectural projects and interiors.";
+      if (ogTitle) ogTitle.content = 'Wood Veneers in Nagpur | M Bros Veneers Showroom';
+      if (ogDesc) ogDesc.content = 'Nagpur\'s leading veneer showroom. Shop 200+ natural & decorative veneer sheets for furniture, doors, cabinets & interiors. Trusted by architects since 1990.';
     }
   }, [isCatalogue, isVeneerPage]);
 
@@ -1196,6 +1360,7 @@ export default function App() {
             <Showroom />
             <ShowroomGallery />
             <CuratedPalettes />
+            <HomeFAQ />
             <ContactSection />
           </main>
           <Footer />

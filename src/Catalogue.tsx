@@ -70,12 +70,12 @@ export default function Catalogue() {
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
               Back to Home
             </a>
-            <span className="text-gold uppercase tracking-[0.4em] text-xs font-bold mb-4 block">The Complete Archive</span>
+            <span className="text-gold uppercase tracking-[0.4em] text-xs font-bold mb-4 block">Natural Veneer Sheets — 200+ Varieties</span>
             <h1 className="text-5xl md:text-7xl font-serif text-white mb-6 leading-tight">
-              Master <span className="italic text-wood-light">Catalogue</span>
+              Premium <span className="italic text-wood-light">Veneer Sheets</span>
             </h1>
             <p className="text-wood-light text-lg md:text-xl font-light leading-relaxed max-w-2xl">
-              An uncompromised selection of our finest natural woods. Explore the intricate details, rich textures, and royal heritage of our exotic collections.
+              India's most comprehensive decorative veneer catalogue — teak veneer sheets, oak veneer sheets, walnut veneer sheets, burl veneers, and exotic fluted panels. Available for furniture makers, interior designers, architects, and commercial bulk orders from our Nagpur showroom.
             </p>
           </div>
         </div>
