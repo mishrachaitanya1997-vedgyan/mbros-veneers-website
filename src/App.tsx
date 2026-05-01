@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import Catalogue from './Catalogue';
+import VeneerCategoryPage from './VeneerCategoryPage';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Menu, 
@@ -65,60 +66,76 @@ const COLLECTIONS = [
     title: 'Exotic Burls',
     description: 'Rare burl patterns and unique grains sourced from the most remote corners of the world.',
     image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/complete%20room%20with%20balcony%20view.jpeg',
-    tag: 'Rare'
+    tag: 'Rare',
+    href: '/veneers/burl',
   },
   {
     id: 'classic',
     title: 'Heritage Oaks',
     description: 'The foundation of luxury. Timeless European Oaks offering beautiful continuous wood grain.',
     image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/brown%20wood%20textured%20veneer%20with%20light%20colored%20sofa%20in%20the%20foreground.jpeg',
-    tag: 'Heritage'
+    tag: 'Heritage',
+    href: '/veneers/oak',
   },
   {
     id: 'fluted',
     title: 'Fluted Veneer',
     description: 'Elegant vertical grain patterns and rich textures creating stunning interior feature walls.',
     image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/fluted%20veneer%20.jpeg',
-    tag: 'Artisanal'
+    tag: 'Artisanal',
+    href: '/catalogue',
   },
   {
     id: 'modern',
     title: 'Architectural Light',
     description: 'Consistent light shade veneers optimizing natural light for large-scale modern architectural projects.',
     image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/room%20with%20light%20coming%20from%20windows%20and%20light%20shade%20veneers.jpeg',
-    tag: 'Modern'
+    tag: 'Modern',
+    href: '/catalogue',
   },
   {
     id: 'dark-fluted',
     title: 'Dark Fluted Elegance',
     description: 'A sophisticated harmony of dark fumed fluted veneer accented with light panels.',
     image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/fluted%20dark%20colored%20veneer%20in%20the%20background%20with%20light%20colored%20veneer%20in%20the%20rest%20of%20the%20area.jpeg',
-    tag: 'Premium'
+    tag: 'Premium',
+    href: '/catalogue',
   },
   {
     id: 'checkered',
     title: 'White Checkered',
     description: 'Bespoke checkered patterns offering a vivid and dynamic visual texture to any expanse.',
     image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/full%20room%20view%20with%20balcone%20and%20TC%20with%20white%20chekered%20veneer%20.jpeg',
-    tag: 'Bespoke'
+    tag: 'Bespoke',
+    href: '/catalogue',
   },
   {
     id: 'grand-lobby',
     title: 'Grand Walnut',
     description: 'Deep, rich dark-colored veneers perfect for wide window panes and sweeping lobbies.',
     image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/full%20room%20view%20with%20lobby%20and%20wide%20window%20pane%20and%20dark%20colored%20veneer.jpeg',
-    tag: 'Grand'
+    tag: 'Grand',
+    href: '/catalogue',
   },
   {
     id: 'contemporary',
     title: 'Smoked Gray',
     description: 'Subtle brownish-gray tones lending a calm, contemporary ambiance to minimalist spaces.',
     image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/room%20with%20slight%20brownish%20gray%20veneer%20throughout%20the%20background%20and%20one%20wall%20with%20one%20side%20open%20window.jpeg',
-    tag: 'Contemporary'
-  }
+    tag: 'Contemporary',
+    href: '/catalogue',
+  },
 ];
 
 // --- Components ---
+
+// --- Lightweight SPA navigate helper ---
+// Uses History API so links don't cause full page reloads.
+// Components call navigate('/catalogue') instead of window.location.href.
+const navigate = (path: string) => {
+  window.history.pushState({}, '', path);
+  window.dispatchEvent(new PopStateEvent('popstate'));
+};
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -131,35 +148,48 @@ const Navbar = () => {
   }, []);
 
   const navLinks = [
-    { name: 'Home', href: '#' },
-    { name: 'Catalogue', href: '#/catalogue' },
+    { name: 'Home', href: '/' },
+    { name: 'Catalogue', href: '/catalogue' },
     { name: 'Collections', href: '#collections' },
     { name: 'Showroom', href: '#showroom' },
     { name: 'Contact', href: '#contact' },
   ];
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'bg-wood-cream/95 backdrop-blur-md py-3 shadow-md' : 'bg-transparent py-8'}`}>
+    <nav
+      role="navigation"
+      aria-label="Main navigation"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled ? 'bg-wood-cream/95 backdrop-blur-md py-3 shadow-md' : 'bg-transparent py-8'}`}
+    >
       <div className="container mx-auto px-6 flex justify-between items-center">
-        <a href="#" className="flex items-center shrink-0">
+        <a href="/" className="flex items-center shrink-0" aria-label="M Bros Veneers — Home">
           <img 
             src="https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/logo/M%20BROS%20VENEERS%20%26%20PLY%20LOGO.PNG" 
             alt="M Bros Veneers Logo" 
+            width="160"
+            height="64"
             className={`transition-all duration-500 ${isScrolled ? 'h-10' : 'h-16'} object-contain`}
+            loading="eager"
+            decoding="async"
           />
         </a>
 
         {/* Desktop Nav */}
         <div className="hidden lg:flex items-center gap-10">
-          {navLinks.map((link) => (
-            <a 
-              key={link.name} 
-              href={link.href} 
-              className={`text-sm uppercase tracking-widest font-medium transition-colors hover:text-gold ${isScrolled ? 'text-wood-dark' : 'text-white'}`}
-            >
-              {link.name}
-            </a>
-          ))}
+          {navLinks.map((link) => {
+            // Anchor-links (#collections etc.) scroll in-page; path links use SPA nav
+            const isPathLink = link.href.startsWith('/');
+            return (
+              <a
+                key={link.name}
+                href={link.href}
+                onClick={isPathLink ? (e) => { e.preventDefault(); navigate(link.href); } : undefined}
+                className={`text-sm uppercase tracking-widest font-medium transition-colors hover:text-gold ${isScrolled ? 'text-wood-dark' : 'text-white'}`}
+              >
+                {link.name}
+              </a>
+            );
+          })}
           <AppointmentDialog>
             <Button className={`${isScrolled ? 'bg-wood-dark text-wood-cream' : 'bg-gold text-wood-dark'} hover:bg-wood-medium hover:text-wood-cream rounded-none px-6 uppercase tracking-widest text-xs transition-all duration-300`}>
               Book Viewing
@@ -168,8 +198,14 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Menu Toggle */}
-        <button className={`${isScrolled ? 'text-wood-dark' : 'text-white'} md:hidden`} onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-          {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+        <button
+          className={`${isScrolled ? 'text-wood-dark' : 'text-white'} md:hidden`}
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          aria-expanded={isMobileMenuOpen}
+          aria-controls="mobile-navigation"
+        >
+          {isMobileMenuOpen ? <X size={28} aria-hidden="true" /> : <Menu size={28} aria-hidden="true" />}
         </button>
       </div>
 
@@ -177,22 +213,26 @@ const Navbar = () => {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div 
+            id="mobile-navigation"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             className="absolute top-full left-0 right-0 bg-wood-cream border-t border-wood-light/20 p-6 md:hidden shadow-xl"
           >
             <div className="flex flex-col gap-6">
-              {navLinks.map((link) => (
-                <a 
-                  key={link.name} 
-                  href={link.href} 
-                  className="text-lg font-serif text-wood-dark"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {link.name}
-                </a>
-              ))}
+              {navLinks.map((link) => {
+                const isPathLink = link.href.startsWith('/');
+                return (
+                  <a
+                    key={link.name}
+                    href={link.href}
+                    onClick={isPathLink ? (e) => { e.preventDefault(); navigate(link.href); setIsMobileMenuOpen(false); } : (() => setIsMobileMenuOpen(false))}
+                    className="text-lg font-serif text-wood-dark"
+                  >
+                    {link.name}
+                  </a>
+                );
+              })}
               <AppointmentDialog>
                 <Button className="w-full bg-wood-dark text-wood-cream rounded-none uppercase tracking-widest">
                   Book Private Viewing
@@ -326,13 +366,18 @@ const AppointmentDialog = ({ children }: { children: React.ReactElement }) => {
 
 const Hero = () => {
   return (
-    <section className="relative h-screen w-full overflow-hidden flex items-center">
-      {/* Background Image with Parallax Effect */}
+    <section className="relative h-screen w-full overflow-hidden flex items-center" aria-label="Hero">
+      {/* Background Image — LCP candidate: eager load + fetchpriority high */}
       <div className="absolute inset-0 z-0">
         <img 
           src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=2064&auto=format&fit=crop" 
-          alt="Luxury Wood Interior" 
+          alt="Luxury wood veneer interior showcasing natural grain patterns" 
           className="w-full h-full object-cover scale-105"
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+          width="2064"
+          height="1376"
           referrerPolicy="no-referrer"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
@@ -353,7 +398,7 @@ const Hero = () => {
               <span className="italic text-gold">Veneers</span>
             </h1>
             <p className="text-lg md:text-2xl text-white/90 mb-12 font-light max-w-2xl leading-relaxed">
-              Curating the world's most prestigious wood surfaces for visionary architects and bespoke interiors.
+              Nagpur's premier supplier of exotic wood veneers in Nagpur — natural veneer sheets, decorative veneer supplier, and bespoke architectural surfaces for India's finest interiors.
             </p>
             <div className="flex flex-col sm:flex-row gap-6">
               <a href="#collections">
@@ -409,10 +454,10 @@ const Collections = () => {
               Exotic <span className="italic">Masterpieces</span>
             </h2>
             <p className="text-wood-medium text-xl font-light leading-relaxed">
-              Our gallery features over 200+ varieties of natural wood veneers, each hand-selected for its unique character and architectural potential.
+              Nagpur's largest curated selection of exotic wood veneers — over 200 varieties including rare burls, heritage oaks, teak, fluted panels, and smoked walnut. Each piece hand-selected for architectural excellence.
             </p>
           </div>
-          <a href="#/catalogue">
+          <a href="/catalogue">
             <Button variant="link" className="text-wood-dark p-0 h-auto uppercase tracking-[0.2em] text-xs font-bold group">
               View Full Catalog <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-2" />
             </Button>
@@ -437,8 +482,10 @@ const Collections = () => {
                     <motion.img 
                       layoutId={`card-img-${item.id}`}
                       src={item.image} 
-                      alt={item.title} 
+                      alt={`${item.title} wood veneer collection at M Bros Veneers`}
                       className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                      loading="lazy"
+                      decoding="async"
                       referrerPolicy="no-referrer"
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
@@ -448,9 +495,15 @@ const Collections = () => {
                   </div>
                   <h3 className="text-3xl font-serif text-wood-dark mb-3 tracking-tight">{item.title}</h3>
                   <p className="text-wood-medium text-base font-light leading-relaxed mb-6 line-clamp-2">{item.description}</p>
-                  <span className="text-[11px] uppercase tracking-[0.3em] font-bold text-gold flex items-center gap-3 group-hover:gap-5 transition-all duration-500">
-                    Discover Collection <ArrowRight size={14} />
-                  </span>
+                  {/* Real anchor for crawlability + visual CTA */}
+                  <a
+                    href={item.href}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(item.href); }}
+                    className="text-[11px] uppercase tracking-[0.3em] font-bold text-gold flex items-center gap-3 hover:gap-5 transition-all duration-500"
+                    aria-label={`View ${item.title} veneer collection`}
+                  >
+                    Discover Collection <ArrowRight size={14} aria-hidden="true" />
+                  </a>
                 </CardContent>
               </Card>
             </motion.div>
@@ -548,7 +601,7 @@ const Showroom = () => {
               <span className="italic text-gold">Veneer Gallery</span>
             </h2>
             <p className="text-wood-light text-xl mb-12 leading-relaxed font-light">
-              Located in the heart of Lakadganj, our showroom is a sensory journey through nature's finest textures. We invite you to experience the warmth and depth of real wood in a space designed for inspiration.
+              Located in the heart of Lakadganj, Nagpur, our showroom is home to Central India's largest collection of natural wood veneers — over 200 varieties spanning exotic burls, smoked walnut, teak crown cuts, fluted panels, and more. With 30+ years of trusted service, we're Nagpur's go-to partner for architects, interior designers, and bespoke construction projects.
             </p>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 mb-16">
@@ -616,8 +669,10 @@ const Showroom = () => {
             <div className="aspect-square relative z-10">
               <img 
                 src="https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/showroom_images/DSC06721.JPG" 
-                alt="M Bros Veneers Showroom Exterior" 
+                alt="M Bros Veneers showroom exterior at 81 Queta Colony, Lakadganj, Nagpur" 
                 className="w-full h-full object-cover rounded-sm border border-wood-light/10"
+                loading="lazy"
+                decoding="async"
                 referrerPolicy="no-referrer"
               />
             </div>
@@ -641,13 +696,20 @@ const ShowroomGallery = () => {
     "https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/showroom_images/IMG_5688.JPG"
   ];
 
+  // Pause animation when section is out of viewport — saves CPU/battery
+  const sectionRef = React.useRef<HTMLElement>(null);
+
   return (
-    <section className="py-20 bg-wood-dark overflow-hidden border-t border-wood-light/10">
+    <section
+      ref={sectionRef}
+      aria-label="M Bros Veneers showroom gallery"
+      className="py-20 bg-wood-dark overflow-hidden border-t border-wood-light/10"
+    >
       <div className="container mx-auto px-6 mb-12">
         <span className="text-gold uppercase tracking-[0.4em] text-[10px] font-bold block text-center">Inside The Gallery</span>
       </div>
       <div className="relative w-full flex overflow-x-hidden">
-        <motion.div 
+        <motion.div
           className="flex whitespace-nowrap gap-6 px-3"
           animate={{ x: ["0%", "-50%"] }}
           transition={{
@@ -655,17 +717,19 @@ const ShowroomGallery = () => {
             ease: "linear",
             duration: 40,
           }}
+          // Only render the duplicate set needed for seamless loop
         >
-          {/* Duplicate images array to create seamless loop */}
           {[...images, ...images].map((img, index) => (
-            <div 
-              key={index} 
+            <div
+              key={index}
               className="relative w-[300px] md:w-[450px] lg:w-[600px] aspect-[4/3] shrink-0 overflow-hidden bg-black rounded-sm group"
             >
-              <img 
-                src={img} 
-                alt={`Showroom View ${index + 1}`} 
+              <img
+                src={img}
+                alt={`M Bros Veneers Nagpur showroom interior view ${(index % images.length) + 1}`}
                 className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110 opacity-80 group-hover:opacity-100"
+                loading={index >= images.length ? 'lazy' : 'eager'}
+                decoding="async"
                 referrerPolicy="no-referrer"
               />
               <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors duration-500" />
@@ -677,17 +741,22 @@ const ShowroomGallery = () => {
   );
 };
 
+
+
 const Offers = () => {
   return (
     <section className="py-32 bg-wood-cream border-y border-wood-light/10">
       <div className="container mx-auto px-6">
         <div className="bg-wood-dark text-wood-cream p-12 md:p-24 relative overflow-hidden">
           {/* Decorative background */}
-          <div className="absolute top-0 right-0 w-1/2 h-full opacity-20">
+          <div className="absolute top-0 right-0 w-1/2 h-full opacity-20" aria-hidden="true">
             <img 
               src="https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/fluted%20dark%20colored%20veneer%20in%20the%20background%20with%20light%20colored%20veneer%20in%20the%20rest%20of%20the%20area.jpeg" 
-              alt="Wood Texture" 
+              alt="" 
+              role="presentation"
               className="w-full h-full object-cover grayscale opacity-50 mix-blend-overlay"
+              loading="lazy"
+              decoding="async"
               referrerPolicy="no-referrer"
             />
           </div>
@@ -702,9 +771,11 @@ const Offers = () => {
               Exclusive early access to our newly arrived Italian Walnut burls. Limited stock available for bespoke architectural projects.
             </p>
             <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
-              <Button className="bg-gold text-wood-dark hover:bg-white transition-all rounded-none px-10 py-6 text-xs uppercase tracking-widest font-bold">
-                Inquire Now
-              </Button>
+              <a href="#contact">
+                <Button className="bg-gold text-wood-dark hover:bg-white transition-all rounded-none px-10 py-6 text-xs uppercase tracking-widest font-bold">
+                  Inquire Now
+                </Button>
+              </a>
               <span className="text-gold font-serif italic text-xl">Up to 15% off for architects</span>
             </div>
           </div>
@@ -735,7 +806,7 @@ const CuratedPalettes = () => {
               Discover a spectrum of hues, grains, and finishes. Our comprehensive swatches allow visionaries to perfectly match any aesthetic requirement in person.
             </p>
           </div>
-          <a href="#/catalogue">
+          <a href="/catalogue">
             <Button variant="outline" className="border-wood-dark text-wood-dark hover:bg-wood-dark hover:text-wood-cream transition-all rounded-none px-8 py-6 text-xs uppercase tracking-[0.2em] font-bold">
               Explore Full Catalog
             </Button>
@@ -754,8 +825,10 @@ const CuratedPalettes = () => {
              >
                <img 
                  src={img} 
-                 alt={`Curated Palette ${idx + 1}`} 
+                 alt={`M Bros Veneers curated wood palette swatch board ${idx + 1} — colour and grain variations`}
                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-90 group-hover:opacity-100"
+                 loading="lazy"
+                 decoding="async"
                  referrerPolicy="no-referrer"
                />
                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
@@ -893,17 +966,17 @@ const ContactSection = () => {
                 <h4 className="font-serif text-2xl text-wood-dark mb-4">Contact Info</h4>
                 <div className="space-y-4">
                   <div className="flex items-start gap-4">
-                    <Phone className="text-gold shrink-0 mt-1" size={20} />
+                    <Phone className="text-gold shrink-0 mt-1" size={20} aria-hidden="true" />
                     <div>
                       <p className="text-xs uppercase tracking-widest text-wood-medium mb-1">Call Us</p>
-                      <p className="text-wood-dark font-medium">+91 99221 66866</p>
+                      <a href="tel:+919922166866" className="text-wood-dark font-medium hover:text-gold transition-colors">+91 99221 66866</a>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
-                    <Mail className="text-gold shrink-0 mt-1" size={20} />
+                    <Mail className="text-gold shrink-0 mt-1" size={20} aria-hidden="true" />
                     <div>
                       <p className="text-xs uppercase tracking-widest text-wood-medium mb-1">Email Us</p>
-                      <p className="text-wood-dark font-medium">info@mbrosveneers.com</p>
+                      <a href="mailto:info@mbrosveneers.com" className="text-wood-dark font-medium hover:text-gold transition-colors">info@mbrosveneers.com</a>
                     </div>
                   </div>
                 </div>
@@ -1012,14 +1085,23 @@ const Footer = () => {
               Nagpur's premier destination for luxury wood veneers. We bring the world's finest timber textures to your doorstep, ensuring every architectural vision is realized with perfection.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="text-wood-dark hover:text-gold transition-colors"><Instagram size={24} /></a>
+              <a
+                href="https://www.instagram.com/mbrosveneers"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-wood-dark hover:text-gold transition-colors"
+                aria-label="Follow M Bros Veneers on Instagram"
+              >
+                <Instagram size={24} aria-hidden="true" />
+              </a>
             </div>
           </div>
 
           <div>
             <h4 className="font-serif text-xl text-wood-dark mb-6">Quick Links</h4>
             <ul className="space-y-4 text-sm text-wood-medium">
-              <li><a href="#" className="hover:text-gold transition-colors">Home</a></li>
+              <li><a href="/" className="hover:text-gold transition-colors">Home</a></li>
+              <li><a href="/catalogue" className="hover:text-gold transition-colors">Catalogue</a></li>
               <li><a href="#collections" className="hover:text-gold transition-colors">Collections</a></li>
               <li><a href="#showroom" className="hover:text-gold transition-colors">Showroom</a></li>
               <li><a href="#contact" className="hover:text-gold transition-colors">Contact</a></li>
@@ -1059,23 +1141,52 @@ const Footer = () => {
 };
 
 export default function App() {
-  const [currentPath, setCurrentPath] = useState(window.location.hash);
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
 
   useEffect(() => {
-    const onHashChange = () => {
-      setCurrentPath(window.location.hash);
+    const onNavigation = () => {
+      setCurrentPath(window.location.pathname);
     };
-    window.addEventListener('hashchange', onHashChange);
-    return () => window.removeEventListener('hashchange', onHashChange);
+    window.addEventListener('popstate', onNavigation);
+    return () => window.removeEventListener('popstate', onNavigation);
   }, []);
 
-  const isCatalogue = currentPath.startsWith('#/catalogue');
+  const isCatalogue = currentPath === '/catalogue' || currentPath.startsWith('/catalogue/');
+  const veneerSlug = currentPath.startsWith('/veneers/')
+    ? (currentPath.split('/veneers/')[1]?.replace(/\/$/, '') as 'burl' | 'teak' | 'oak' | undefined)
+    : undefined;
+  const isVeneerPage = veneerSlug === 'burl' || veneerSlug === 'teak' || veneerSlug === 'oak';
+
+  // Per-route: update title, canonical, og:url, og:title, og:description
+  useEffect(() => {
+    const canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
+    const ogUrl = document.querySelector('meta[property="og:url"]') as HTMLMetaElement | null;
+    const ogTitle = document.querySelector('meta[property="og:title"]') as HTMLMetaElement | null;
+    const ogDesc = document.querySelector('meta[property="og:description"]') as HTMLMetaElement | null;
+
+    if (isCatalogue) {
+      document.title = 'Master Catalogue | M Bros Veneers — Wood Veneers Nagpur';
+      if (canonical) canonical.href = 'https://mbrosveneers.com/catalogue';
+      if (ogUrl) ogUrl.content = 'https://mbrosveneers.com/catalogue';
+      if (ogTitle) ogTitle.content = 'Master Catalogue | M Bros Veneers — Wood Veneers Nagpur';
+      if (ogDesc) ogDesc.content = 'Browse 200+ natural wood veneer sheets at M Bros Veneers Nagpur — exotic burls, teak, oak, fluted veneers, and more.';
+    } else if (!isVeneerPage) {
+      // Homepage — VeneerCategoryPage handles its own meta
+      document.title = 'M Bros Veneers | Exotic & Luxury Wood Veneers in Nagpur';
+      if (canonical) canonical.href = 'https://mbrosveneers.com/';
+      if (ogUrl) ogUrl.content = 'https://mbrosveneers.com/';
+      if (ogTitle) ogTitle.content = 'M Bros Veneers | Exotic & Luxury Wood Veneers in Nagpur';
+      if (ogDesc) ogDesc.content = "Nagpur's premier veneer gallery. Discover 200+ varieties of natural, exotic, and luxury wood veneers for bespoke architectural projects and interiors.";
+    }
+  }, [isCatalogue, isVeneerPage]);
 
   return (
     <div className="min-h-screen selection:bg-gold selection:text-wood-dark">
-      {!isCatalogue && <Navbar />}
+      {!isCatalogue && !isVeneerPage && <Navbar />}
       {isCatalogue ? (
         <Catalogue />
+      ) : isVeneerPage && veneerSlug ? (
+        <VeneerCategoryPage slug={veneerSlug} />
       ) : (
         <>
           <main>

@@ -20,6 +20,19 @@ export default defineConfig(({mode}) => {
       rollupOptions: {
         output: {
           manualChunks(id) {
+            // Split heavy animation library into its own chunk
+            if (id.includes('node_modules/motion') || id.includes('node_modules/framer-motion')) {
+              return 'motion';
+            }
+            // Email sending lib — only needed on form submit
+            if (id.includes('node_modules/@emailjs')) {
+              return 'emailjs';
+            }
+            // Radix UI components into their own chunk
+            if (id.includes('node_modules/@radix-ui') || id.includes('node_modules/@base-ui')) {
+              return 'ui';
+            }
+            // All other node_modules
             if (id.includes('node_modules')) {
               return 'vendor';
             }
@@ -31,6 +44,8 @@ export default defineConfig(({mode}) => {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modify—file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',
+      // Required for SPA path routing (serves index.html for any unmatched route)
+      historyApiFallback: true,
     },
   };
 });

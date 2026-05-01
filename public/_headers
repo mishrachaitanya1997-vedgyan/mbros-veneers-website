@@ -1,0 +1,22 @@
+# Cloudflare Pages cache headers
+# Prevent HTML from being cached so route changes and meta updates are always fresh
+
+/*.html
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/
+  Cache-Control: no-cache, no-store, must-revalidate
+
+# Cache static assets aggressively (they're content-hashed by Vite)
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Cache public assets (images, fonts, etc.) for 1 week
+/logo*
+  Cache-Control: public, max-age=604800
+
+# Security headers
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin

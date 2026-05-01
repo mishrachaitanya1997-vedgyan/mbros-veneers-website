@@ -4,18 +4,40 @@
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
           http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 
-  <!-- Homepage (SPA root) -->
+  <!-- Homepage -->
   <url>
     <loc>https://mbrosveneers.com/</loc>
-    <lastmod>2026-04-29</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
-  <!-- Catalogue page (hash-route rendered as the SPA root) -->
+  <!-- Master Catalogue — all 200+ veneers -->
   <url>
-    <loc>https://mbrosveneers.com/#/catalogue</loc>
-    <lastmod>2026-04-29</lastmod>
+    <loc>https://mbrosveneers.com/catalogue</loc>
+    <lastmod>2026-05-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Veneer category sub-pages — keyword-targeted, fully crawlable -->
+  <url>
+    <loc>https://mbrosveneers.com/veneers/burl</loc>
+    <lastmod>2026-05-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://mbrosveneers.com/veneers/teak</loc>
+    <lastmod>2026-05-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://mbrosveneers.com/veneers/oak</loc>
+    <lastmod>2026-05-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

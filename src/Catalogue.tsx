@@ -4,6 +4,13 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, ArrowLeft, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+// Shared SPA navigate helper (mirrors App.tsx)
+const navigate = (path: string) => {
+  window.history.pushState({}, '', path);
+  window.dispatchEvent(new PopStateEvent('popstate'));
+};
+
+
 const CATALOGUE_ITEMS = [
   { id: 'cat-1', title: 'Royal Ebony Burl', tag: 'Exotic Series', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5110.JPG' },
   { id: 'cat-2', title: 'Smoked Walnut', tag: 'Premium', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5118.JPG' },
@@ -47,15 +54,19 @@ export default function Catalogue() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-8">
           <div className="max-w-3xl">
             <div className="mb-10">
-              <a href="#/">
+              <a href="/" aria-label="M Bros Veneers — Back to Homepage" onClick={(e) => { e.preventDefault(); navigate('/'); }}>
                 <img 
                   src="https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/logo/M%20BROS%20VENEERS%20%26%20PLY%20LOGO.PNG" 
                   alt="M Bros Veneers Logo" 
+                  width="160"
+                  height="64"
                   className="h-16 object-contain"
+                  loading="eager"
+                  decoding="async"
                 />
               </a>
             </div>
-            <a href="#/" className="inline-flex items-center gap-2 text-wood-medium hover:text-gold transition-colors text-sm uppercase tracking-widest font-medium mb-8 group">
+            <a href="/" className="inline-flex items-center gap-2 text-wood-medium hover:text-gold transition-colors text-sm uppercase tracking-widest font-medium mb-8 group" onClick={(e) => { e.preventDefault(); navigate('/'); }}>
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
               Back to Home
             </a>
@@ -72,7 +83,7 @@ export default function Catalogue() {
         {/* Masonry/Grid Layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 gap-y-16">
           {CATALOGUE_ITEMS.map((item, index) => (
-            <motion.div
+              <motion.div
               key={item.id}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -85,8 +96,10 @@ export default function Catalogue() {
                 <motion.img 
                   layoutId={`catalogue-img-${item.id}`}
                   src={item.image} 
-                  alt={item.title} 
+                  alt={`${item.title} — ${item.tag} wood veneer from M Bros Veneers Nagpur`}
                   className="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110 opacity-90 group-hover:opacity-100"
+                  loading="lazy"
+                  decoding="async"
                   referrerPolicy="no-referrer"
                 />
                 
@@ -96,7 +109,7 @@ export default function Catalogue() {
                 {/* Maximize icon */}
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 scale-90 group-hover:scale-100">
                   <div className="w-16 h-16 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 text-white">
-                    <Maximize2 className="w-6 h-6" />
+                    <Maximize2 className="w-6 h-6" aria-hidden="true" />
                   </div>
                 </div>
 
@@ -173,11 +186,12 @@ export default function Catalogue() {
                   Part of our exclusive showroom collection, renowned for its unparalleled depth of texture and monumental presence in luxury architectural spaces. Hand-selected for exceptional grain quality and aesthetic brilliance.
                 </p>
 
-                <a href="#/contact" onClick={() => setSelectedItem(null)}>
-                  <Button className="w-full bg-gold text-wood-dark hover:bg-white transition-all duration-300 rounded-none py-6 uppercase tracking-[0.2em] font-bold">
+                <Button
+                    className="w-full bg-gold text-wood-dark hover:bg-white transition-all duration-300 rounded-none py-6 uppercase tracking-[0.2em] font-bold"
+                    onClick={() => { setSelectedItem(null); navigate('/'); setTimeout(() => { document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); }, 100); }}
+                  >
                     Request Pricing
                   </Button>
-                </a>
               </div>
             </motion.div>
           </motion.div>
