@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ArrowLeft, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { EnquiryDialog } from '@/components/EnquiryDialog';
 
 // Shared SPA navigate helper (mirrors App.tsx)
 const navigate = (path: string) => {
@@ -186,12 +187,13 @@ export default function Catalogue() {
                   Part of our exclusive showroom collection, renowned for its unparalleled depth of texture and monumental presence in luxury architectural spaces. Hand-selected for exceptional grain quality and aesthetic brilliance.
                 </p>
 
-                <Button
-                    className="w-full bg-gold text-wood-dark hover:bg-white transition-all duration-300 rounded-none py-6 uppercase tracking-[0.2em] font-bold"
-                    onClick={() => { setSelectedItem(null); navigate('/'); setTimeout(() => { document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); }, 100); }}
-                  >
-                    Request Pricing
+                <EnquiryDialog defaultMessage={`Hi, I would like to request pricing for the ${selectedItem.title} veneer. Please let me know the details.`}>
+                  <Button
+                      className="w-full bg-gold text-wood-dark hover:bg-white transition-all duration-300 rounded-none py-6 uppercase tracking-[0.2em] font-bold"
+                    >
+                      Request Pricing
                   </Button>
+                </EnquiryDialog>
               </div>
             </motion.div>
           </motion.div>
