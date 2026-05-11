@@ -19,6 +19,7 @@ import {
   Clock
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { EnquiryDialog } from '@/components/EnquiryDialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -567,12 +568,12 @@ const Collections = () => {
                   <span className="px-4 py-2 border border-wood-light/20">{selectedItem.tag} Collection</span>
                 </div>
 
-                <a href="#contact" onClick={() => setSelectedItem(null)}>
+                <EnquiryDialog defaultMessage={`Hi, I would like to inquire about the availability of the ${selectedItem.title} veneer. Please provide me with more details.`}>
                   <Button className="w-full bg-wood-dark text-wood-cream hover:bg-gold hover:text-wood-dark transition-all duration-500 rounded-none py-8 uppercase tracking-[0.2em] font-bold group flex items-center justify-center gap-4">
                     Inquire Availability
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
                   </Button>
-                </a>
+                </EnquiryDialog>
               </div>
             </motion.div>
           </motion.div>
