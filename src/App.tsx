@@ -43,6 +43,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import emailjs from '@emailjs/browser';
+import { useContent } from './content/ContentProvider';
+import { applyHomeSeo, applySiteStructuredData } from './content/seo';
+import type { CollectionItem } from './content/types';
 
 // --- Types & Constants ---
 
@@ -60,73 +63,6 @@ const contactSchema = z.object({
   subject: z.string().min(2, "Subject is required"),
   message: z.string().min(10, "Message must be at least 10 characters"),
 });
-
-const COLLECTIONS = [
-  {
-    id: 'exotic',
-    title: 'Exotic Burls',
-    description: 'Rare burl patterns and unique grains sourced from the most remote corners of the world.',
-    image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/complete%20room%20with%20balcony%20view.jpeg',
-    tag: 'Rare',
-    href: '/veneers/burl',
-  },
-  {
-    id: 'classic',
-    title: 'Heritage Oaks',
-    description: 'The foundation of luxury. Timeless European Oaks offering beautiful continuous wood grain.',
-    image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/brown%20wood%20textured%20veneer%20with%20light%20colored%20sofa%20in%20the%20foreground.jpeg',
-    tag: 'Heritage',
-    href: '/veneers/oak',
-  },
-  {
-    id: 'fluted',
-    title: 'Fluted Veneer',
-    description: 'Elegant vertical grain patterns and rich textures creating stunning interior feature walls.',
-    image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/fluted%20veneer%20.jpeg',
-    tag: 'Artisanal',
-    href: '/catalogue',
-  },
-  {
-    id: 'modern',
-    title: 'Architectural Light',
-    description: 'Consistent light shade veneers optimizing natural light for large-scale modern architectural projects.',
-    image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/room%20with%20light%20coming%20from%20windows%20and%20light%20shade%20veneers.jpeg',
-    tag: 'Modern',
-    href: '/catalogue',
-  },
-  {
-    id: 'dark-fluted',
-    title: 'Dark Fluted Elegance',
-    description: 'A sophisticated harmony of dark fumed fluted veneer accented with light panels.',
-    image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/fluted%20dark%20colored%20veneer%20in%20the%20background%20with%20light%20colored%20veneer%20in%20the%20rest%20of%20the%20area.jpeg',
-    tag: 'Premium',
-    href: '/catalogue',
-  },
-  {
-    id: 'checkered',
-    title: 'White Checkered',
-    description: 'Bespoke checkered patterns offering a vivid and dynamic visual texture to any expanse.',
-    image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/full%20room%20view%20with%20balcone%20and%20TC%20with%20white%20chekered%20veneer%20.jpeg',
-    tag: 'Bespoke',
-    href: '/catalogue',
-  },
-  {
-    id: 'grand-lobby',
-    title: 'Grand Walnut',
-    description: 'Deep, rich dark-colored veneers perfect for wide window panes and sweeping lobbies.',
-    image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/full%20room%20view%20with%20lobby%20and%20wide%20window%20pane%20and%20dark%20colored%20veneer.jpeg',
-    tag: 'Grand',
-    href: '/catalogue',
-  },
-  {
-    id: 'contemporary',
-    title: 'Smoked Gray',
-    description: 'Subtle brownish-gray tones lending a calm, contemporary ambiance to minimalist spaces.',
-    image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/room%20with%20slight%20brownish%20gray%20veneer%20throughout%20the%20background%20and%20one%20wall%20with%20one%20side%20open%20window.jpeg',
-    tag: 'Contemporary',
-    href: '/catalogue',
-  },
-];
 
 // --- Components ---
 
@@ -431,7 +367,8 @@ const Hero = () => {
 };
 
 const Collections = () => {
-  const [selectedItem, setSelectedItem] = useState<typeof COLLECTIONS[0] | null>(null);
+  const { collections } = useContent().home;
+  const [selectedItem, setSelectedItem] = useState<CollectionItem | null>(null);
 
   useEffect(() => {
     if (selectedItem) {
@@ -455,7 +392,7 @@ const Collections = () => {
               Natural <span className="italic">Veneer Sheets</span>
             </h2>
             <p className="text-wood-medium text-xl font-light leading-relaxed">
-              India's most curated selection of decorative veneer sheets — teak, oak, walnut, burl, and fluted panels. Over 200 varieties in our Nagpur showroom, each hand-picked for quality and character. Available for furniture makers, interior designers, architects, and bulk orders.
+              {collections.intro}
             </p>
           </div>
           <a href="/catalogue">
@@ -466,7 +403,7 @@ const Collections = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
-          {COLLECTIONS.map((item, index) => (
+          {collections.items.map((item, index) => (
             <motion.div
               key={item.id}
               initial={{ opacity: 0, y: 20 }}
@@ -845,49 +782,7 @@ const CuratedPalettes = () => {
 
 const HomeFAQ = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-
-  const faqs = [
-    {
-      q: 'What is wood veneer?',
-      a: 'Wood veneer is a thin, precision-cut slice of real natural wood — typically 0.5mm to 3mm thick — bonded to a substrate such as MDF or plywood. It delivers the warmth, grain, and character of solid timber at a fraction of the weight and cost, making it the preferred choice of architects and interior designers worldwide.',
-    },
-    {
-      q: 'What types of wood veneer sheets do you stock?',
-      a: 'Our Nagpur showroom carries over 200 varieties of natural veneer sheets including teak veneer, oak veneer, walnut veneer, burl wood veneer, smoked walnut, fluted veneer panels, Nordic charcoal, wenge, and a full range of exotic and architectural veneers. Every piece is hand-selected for consistency and quality.',
-    },
-    {
-      q: 'Where is your veneer showroom located in Nagpur?',
-      a: 'M Bros Veneers is located at 81, Queta Colony, Lakadganj, Nagpur — 440008, Maharashtra. We are conveniently accessible from Sitabuldi, Dharampeth, and central Nagpur. Open Monday to Saturday, 10:00 AM to 8:00 PM. Sundays by appointment only.',
-    },
-    {
-      q: 'What is the difference between veneer and laminate?',
-      a: 'Veneer is a real wood surface — it ages gracefully, can be re-sanded and re-polished, and carries the natural warmth only genuine timber offers. Laminate is a synthetic material with a printed wood pattern. For premium furniture, doors, cabinets, and feature walls, veneer is the material of distinction.',
-    },
-    {
-      q: 'Can I use veneer sheets for furniture and cabinets?',
-      a: 'Absolutely. Veneer sheets are ideal for furniture surfaces, cabinet fronts, wardrobe shutters, and bespoke joinery. Teak, oak, and walnut veneer are especially popular for furniture-grade applications. Visit our showroom to choose from physical swatches before placing your order.',
-    },
-    {
-      q: 'Can I visit the showroom to see veneer samples in person?',
-      a: 'Yes — and we strongly encourage it. The true character of a wood veneer is best experienced in person: the grain depth, the surface texture, the way light plays across it. Visit us at Lakadganj, Nagpur, Monday to Saturday. For architects and designers with large requirements, private viewings can be arranged.',
-    },
-    {
-      q: 'Do you supply bulk veneer sheets for commercial projects?',
-      a: 'Yes. We are a trusted commercial veneer supplier across Central India, regularly supplying bulk veneer sheets to hotel groups, corporate fit-out contractors, residential developers, and large-scale interior projects. Contact us with your project specifications for a tailored quote.',
-    },
-    {
-      q: 'Do you work with architects and interior designers?',
-      a: 'Veneer selection is a core part of our offering for the design community. We work closely with architects, interior designers, and specification consultants to source the right veneer for each project. We offer expert material guidance, sample packs, and dedicated support throughout your project.',
-    },
-    {
-      q: 'How do I choose the right veneer for my project?',
-      a: 'Start with the setting: lighter veneers like ash and oak work well in spaces with natural light; dark veneers like fumed oak or smoked walnut add depth in statement rooms. Consider the application — furniture, wall panels, or doors — and always evaluate a physical swatch in the actual lighting of your space. Our team is available to advise.',
-    },
-    {
-      q: 'How do I get a price for wood veneer sheets in Nagpur?',
-      a: 'Pricing depends on species, grade, sheet size, and quantity. We offer competitive rates for both retail and bulk orders. Visit our Nagpur showroom or send us your project brief via the contact form below — our team will respond within 24 hours with a detailed quote.',
-    },
-  ];
+  const faqs = useContent().home.faqs.items;
 
   return (
     <section className="py-32 md:py-48 bg-wood-cream border-t border-wood-light/20" aria-labelledby="faq-heading">
@@ -1006,6 +901,7 @@ const HomeFAQ = () => {
 };
 
 const ContactSection = () => {
+  const settings = useContent().site.settings;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{ type: 'success' | 'error' | null, message: string }>({ type: null, message: '' });
   const form = useForm<z.infer<typeof contactSchema>>({
@@ -1135,14 +1031,14 @@ const ContactSection = () => {
                     <Phone className="text-gold shrink-0 mt-1" size={20} aria-hidden="true" />
                     <div>
                       <p className="text-xs uppercase tracking-widest text-wood-medium mb-1">Call Us</p>
-                      <a href="tel:+919922166866" className="text-wood-dark font-medium hover:text-gold transition-colors">+91 99221 66866</a>
+                      <a href={`tel:${settings.phone}`} className="text-wood-dark font-medium hover:text-gold transition-colors">{settings.phoneDisplay}</a>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
                     <Mail className="text-gold shrink-0 mt-1" size={20} aria-hidden="true" />
                     <div>
                       <p className="text-xs uppercase tracking-widest text-wood-medium mb-1">Email Us</p>
-                      <a href="mailto:info@mbrosveneers.com" className="text-wood-dark font-medium hover:text-gold transition-colors">info@mbrosveneers.com</a>
+                      <a href={`mailto:${settings.email}`} className="text-wood-dark font-medium hover:text-gold transition-colors">{settings.email}</a>
                     </div>
                   </div>
                 </div>
@@ -1165,7 +1061,7 @@ const ContactSection = () => {
               <div>
                 <h4 className="font-serif text-2xl text-wood-dark mb-4">Follow Us</h4>
                 <div className="flex gap-4">
-                  <a href="https://instagram.com/mbrosveneers" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-wood-light/40 flex items-center justify-center text-wood-dark hover:bg-wood-dark hover:text-wood-cream transition-all">
+                  <a href={settings.instagramUrl} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-wood-light/40 flex items-center justify-center text-wood-dark hover:bg-wood-dark hover:text-wood-cream transition-all">
                     <Instagram size={20} />
                   </a>
                 </div>
@@ -1307,6 +1203,7 @@ const Footer = () => {
 };
 
 export default function App() {
+  const content = useContent();
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
 
   useEffect(() => {
@@ -1316,6 +1213,11 @@ export default function App() {
     window.addEventListener('popstate', onNavigation);
     return () => window.removeEventListener('popstate', onNavigation);
   }, []);
+
+  // Site-wide LocalBusiness structured data on every route (CMS-editable).
+  useEffect(() => {
+    applySiteStructuredData(content.site.settings);
+  }, [content.site.settings]);
 
   const isCatalogue = currentPath === '/catalogue' || currentPath.startsWith('/catalogue/');
   const veneerSlug = currentPath.startsWith('/veneers/')
@@ -1337,13 +1239,10 @@ export default function App() {
       if (ogTitle) ogTitle.content = 'Natural Veneer Sheets India | M Bros Veneers Catalogue';
       if (ogDesc) ogDesc.content = 'Browse 200+ premium wood veneer sheets: teak, oak, walnut, burl, fluted & exotic. India\'s trusted decorative veneer supplier. Order from Nagpur.';
     } else if (!isVeneerPage) {
-      document.title = 'Wood Veneers in Nagpur | M Bros Veneers Showroom';
-      if (canonical) canonical.href = 'https://mbrosveneers.com/';
-      if (ogUrl) ogUrl.content = 'https://mbrosveneers.com/';
-      if (ogTitle) ogTitle.content = 'Wood Veneers in Nagpur | M Bros Veneers Showroom';
-      if (ogDesc) ogDesc.content = 'Nagpur\'s leading veneer showroom. Shop 200+ natural & decorative veneer sheets for furniture, doors, cabinets & interiors. Trusted by architects since 1990.';
+      // Homepage SEO + LocalBusiness/FAQ structured data, all CMS-editable.
+      applyHomeSeo(content.seo.home, content.site.settings, content.home.faqs.items);
     }
-  }, [isCatalogue, isVeneerPage]);
+  }, [isCatalogue, isVeneerPage, content]);
 
   return (
     <div className="min-h-screen selection:bg-gold selection:text-wood-dark">

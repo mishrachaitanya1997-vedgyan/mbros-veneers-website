@@ -1,108 +1,29 @@
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { ArrowLeft, ArrowRight, MapPin, Phone, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EnquiryDialog } from '@/components/EnquiryDialog';
-// ─── Category configuration ────────────────────────────────────────────────
+import { useContent } from './content/ContentProvider';
+import { applyCategorySeo } from './content/seo';
+
+// Shared SPA navigate helper (mirrors App.tsx / Catalogue.tsx)
+const navigate = (path: string) => {
+  window.history.pushState({}, '', path);
+  window.dispatchEvent(new PopStateEvent('popstate'));
+};
+
 type CategorySlug = 'burl' | 'teak' | 'oak';
 
-const CATEGORY_CONFIG = {
-  burl: {
-    title: 'Exotic Burl Wood Veneers in Nagpur | M Bros Veneers',
-    h1: 'Exotic Burl Wood Veneers in Nagpur',
-    subtitle: 'Rare, Hand-Selected Patterns for Luxury Interiors',
-    description: 'Discover M Bros Veneers\' exclusive collection of exotic burl wood veneer sheets in Nagpur — rare, one-of-a-kind swirling grain patterns sourced from the most remote forests in the world. Ideal for luxury interior design, bespoke furniture, and architectural accent walls.',
-    canonical: 'https://mbrosveneers.com/veneers/burl',
-    ogTitle: 'Exotic Burl Wood Veneers in Nagpur | M Bros Veneers',
-    ogDesc: 'Shop rare burl wood veneer sheets in Nagpur. Hand-selected exotic burl patterns for luxury interiors and architectural projects. Visit our Lakadganj showroom.',
-    heroImage: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/complete%20room%20with%20balcony%20view.jpeg',
-    items: [
-      { title: 'Royal Ebony Burl', tag: 'Exotic Series', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5110.JPG' },
-      { title: 'Geometric Array', tag: 'Bespoke', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/DSC06765.JPG' },
-      { title: 'Veneer Swatch Collection', tag: 'Reference', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/C1311FB5-0B7A-4C65-B51D-A9E9F996F3A6.jpg' },
-    ],
-    faqs: [
-      { q: 'What is burl wood veneer?', a: 'Burl veneer is cut from abnormal rounded growths on tree trunks, producing unique swirling grain patterns found nowhere else in nature. No two burl veneer sheets are identical, making them highly prized for luxury interiors.' },
-      { q: 'What is the difference between veneer and laminate?', a: 'Wood veneer is a real, thin slice of natural wood bonded to a substrate. Laminate is a synthetic material printed to mimic wood. Veneer offers genuine grain warmth, aging character, and is more environmentally sustainable than laminate.' },
-      { q: 'Where can I buy burl wood veneer in Nagpur?', a: 'M Bros Veneers at 81, Queta Colony, Lakadganj, Nagpur stocks one of the largest collections of exotic burl wood veneers in Central India. Visit our showroom Monday–Saturday, 10 AM–8 PM.' },
-    ],
-  },
-  teak: {
-    title: 'Natural Teak Wood Veneers in Nagpur | M Bros Veneers',
-    h1: 'Natural Teak Wood Veneers in Nagpur',
-    subtitle: 'Premium Teak Veneer Sheets for Every Interior Style',
-    description: 'Browse M Bros Veneers\' premium natural teak wood veneer sheets in Nagpur. From classic Golden Teak Crown cuts to chestnut-grain finishes, our teak veneer collection is ideal for wall panelling, bespoke furniture, and interior design projects across Central India.',
-    canonical: 'https://mbrosveneers.com/veneers/teak',
-    ogTitle: 'Natural Teak Wood Veneers in Nagpur | M Bros Veneers',
-    ogDesc: 'Premium natural teak wood veneer sheets in Nagpur for furniture, wall panelling, and interior design. Visit our showroom in Lakadganj.',
-    heroImage: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/brown%20wood%20textured%20veneer%20with%20light%20colored%20sofa%20in%20the%20foreground.jpeg',
-    items: [
-      { title: 'Golden Teak Crown', tag: 'Classic', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5339.JPG' },
-      { title: 'Chestnut Grain', tag: 'Classic', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5341.JPG' },
-      { title: 'Smoked Walnut', tag: 'Premium', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5118.JPG' },
-    ],
-    faqs: [
-      { q: 'What is teak wood veneer used for?', a: 'Teak veneer is widely used for wall panelling, furniture surfaces, cabinet doors, flooring overlays, and interior accent features. It provides the warmth and natural grain of solid teak at a fraction of the cost.' },
-      { q: 'How do I choose the best veneer for furniture?', a: 'For furniture, choose a veneer with consistent grain and no knots for a clean look. Teak veneer is excellent for durability; oak for a classic feel. Always request a physical swatch from our Nagpur showroom before committing.' },
-      { q: 'Veneer vs plywood — what is the difference?', a: 'Plywood is a structural board made of multiple wood layers. Veneer is a decorative surface material applied over plywood or MDF. Veneers give plywood furniture the look of solid wood at a much lower cost and weight.' },
-      { q: 'Where can I buy teak veneer sheets in Nagpur?', a: 'M Bros Veneers stocks premium natural teak veneer sheets at our Lakadganj showroom in Nagpur, available for architects, interior designers, and individual buyers.' },
-    ],
-  },
-  oak: {
-    title: 'Heritage Oak Wood Veneers in Nagpur | M Bros Veneers',
-    h1: 'Heritage Oak Wood Veneers in Nagpur',
-    subtitle: 'European Oak Veneer Sheets for Timeless Interiors',
-    description: 'Explore premium European oak wood veneer sheets at M Bros Veneers, Nagpur. From dark fumed oak to smoked charcoal oak, our oak veneer collection is perfect for feature walls, cabinet surfaces, and luxury interior design projects across Maharashtra and Central India.',
-    canonical: 'https://mbrosveneers.com/veneers/oak',
-    ogTitle: 'Heritage Oak Wood Veneers in Nagpur | M Bros Veneers',
-    ogDesc: 'Premium European oak veneer sheets in Nagpur — fumed oak, smoked oak, and natural oak for interior design and architectural projects.',
-    heroImage: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/room%20with%20light%20coming%20from%20windows%20and%20light%20shade%20veneers.jpeg',
-    items: [
-      { title: 'Dark Fumed Oak', tag: 'Heritage', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5121.JPG' },
-      { title: 'Textured Ash', tag: 'Textured', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5119.JPG' },
-      { title: 'Nordic Charcoal', tag: 'Minimalist', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_6041.JPG' },
-    ],
-    faqs: [
-      { q: 'What types of oak veneer are available in Nagpur?', a: 'At M Bros Veneers Nagpur, we stock European oak in multiple finishes including dark fumed oak, natural ash, smoked oak, and Nordic charcoal — suitable for both classic and contemporary interior styles.' },
-      { q: 'How do I maintain wood veneer sheets?', a: 'Clean wood veneer with a soft, slightly damp cloth. Avoid harsh chemicals, excess moisture, and direct sunlight. Use a quality wood oil or polish every 6–12 months to preserve the finish. Properly maintained veneer can last decades.' },
-      { q: 'Is oak veneer suitable for wall panelling?', a: 'Yes. Oak veneer is one of the most popular choices for interior wall panelling due to its clean grain, durability, and ability to complement a wide range of design styles from traditional to modern minimalist.' },
-      { q: 'What is the difference between veneer and laminate for doors?', a: 'Veneer-covered doors use a real wood surface that can be sanded, re-polished, and refinished. Laminate doors have a plastic surface that cannot be restored once scratched. Veneer is the premium, longer-lasting choice for doors and cabinetry.' },
-    ],
-  },
-} satisfies Record<CategorySlug, {
-  title: string; h1: string; subtitle: string; description: string;
-  canonical: string; ogTitle: string; ogDesc: string; heroImage: string;
-  items: { title: string; tag: string; image: string }[];
-  faqs: { q: string; a: string }[];
-}>;
-
 export default function VeneerCategoryPage({ slug }: { slug: CategorySlug }) {
-  const config = CATEGORY_CONFIG[slug];
+  const { pages, site } = useContent();
+  const config = pages[slug];
+  const settings = site.settings;
 
-  // Update page meta on mount
+  // Update page title/meta + FAQ structured data on mount, all CMS-editable.
   useEffect(() => {
-    document.title = config.title;
-    const canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
-    if (canonical) canonical.href = config.canonical;
-    const ogTitle = document.querySelector('meta[property="og:title"]') as HTMLMetaElement | null;
-    const ogDesc = document.querySelector('meta[property="og:description"]') as HTMLMetaElement | null;
-    const ogUrl = document.querySelector('meta[property="og:url"]') as HTMLMetaElement | null;
-    if (ogTitle) ogTitle.content = config.ogTitle;
-    if (ogDesc) ogDesc.content = config.ogDesc;
-    if (ogUrl) ogUrl.content = config.canonical;
+    applyCategorySeo(config);
     window.scrollTo(0, 0);
   }, [config]);
-
-  // JSON-LD FAQ schema for rich results
-  const faqSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: config.faqs.map(({ q, a }) => ({
-      '@type': 'Question',
-      name: q,
-      acceptedAnswer: { '@type': 'Answer', text: a },
-    })),
-  };
 
   return (
     <div className="min-h-screen bg-wood-dark text-wood-cream font-sans">
@@ -233,15 +154,15 @@ export default function VeneerCategoryPage({ slug }: { slug: CategorySlug }) {
           <div className="flex flex-col sm:flex-row gap-8 mb-8 text-sm text-wood-light">
             <div className="flex items-start gap-3">
               <MapPin className="text-gold shrink-0 mt-0.5" size={16} aria-hidden="true" />
-              <span>81, Queta Colony, Lakadganj, Nagpur – 440008</span>
+              <span>{settings.address.full}</span>
             </div>
             <div className="flex items-start gap-3">
               <Phone className="text-gold shrink-0 mt-0.5" size={16} aria-hidden="true" />
-              <a href="tel:+919922166866" className="hover:text-gold transition-colors">+91 99221 66866</a>
+              <a href={`tel:${settings.phone}`} className="hover:text-gold transition-colors">{settings.phoneDisplay}</a>
             </div>
             <div className="flex items-start gap-3">
               <Mail className="text-gold shrink-0 mt-0.5" size={16} aria-hidden="true" />
-              <a href="mailto:info@mbrosveneers.com" className="hover:text-gold transition-colors">info@mbrosveneers.com</a>
+              <a href={`mailto:${settings.email}`} className="hover:text-gold transition-colors">{settings.email}</a>
             </div>
           </div>
           <EnquiryDialog>
@@ -253,12 +174,6 @@ export default function VeneerCategoryPage({ slug }: { slug: CategorySlug }) {
           </EnquiryDialog>
         </section>
       </div>
-
-      {/* Inject FAQ JSON-LD */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
-      />
     </div>
   );
 }
