@@ -5,35 +5,104 @@ import { X, ArrowLeft, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EnquiryDialog } from '@/components/EnquiryDialog';
 
+const API_URL = ((import.meta.env.VITE_API_URL as string | undefined) ?? '').replace(/\/$/, '');
+
 // Shared SPA navigate helper (mirrors App.tsx)
 const navigate = (path: string) => {
   window.history.pushState({}, '', path);
   window.dispatchEvent(new PopStateEvent('popstate'));
 };
 
+type CatalogueItem = {
+  id: string;
+  title: string;
+  tag: string;
+  image: string;
+  imageUrls: string[];
+  description: string;
+  lotNo?: string;
+  priceLabel?: string;
+  stockLabel?: string;
+};
 
-const CATALOGUE_ITEMS = [
-  { id: 'cat-1', title: 'Royal Ebony Burl', tag: 'Exotic Series', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5110.JPG' },
-  { id: 'cat-2', title: 'Smoked Walnut', tag: 'Premium', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5118.JPG' },
-  { id: 'cat-3', title: 'Textured Ash', tag: 'Textured', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5119.JPG' },
-  { id: 'cat-4', title: 'Dark Fumed Oak', tag: 'Heritage', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5121.JPG' },
-  { id: 'cat-5', title: 'Golden Teak Crown', tag: 'Classic', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5339.JPG' },
-  { id: 'cat-6', title: 'Chestnut Grain', tag: 'Classic', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5341.JPG' },
-  { id: 'cat-7', title: 'Wenge Fine Line', tag: 'Modern', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5343.JPG' },
-  { id: 'cat-8', title: 'Silver Grey Fluted', tag: 'Fluted', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5874.JPG' },
-  { id: 'cat-9', title: 'Nordic Charcoal', tag: 'Minimalist', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_6041.JPG' },
-  { id: 'cat-10', title: 'Noir Etched Wood', tag: 'Etched', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/DSC05814.JPG' },
-  { id: 'cat-11', title: 'Geometric Array', tag: 'Bespoke', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/DSC06765.JPG' },
-  { id: 'cat-12', title: 'Veneer Swatch Collection', tag: 'Reference', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/C1311FB5-0B7A-4C65-B51D-A9E9F996F3A6.jpg' },
-  { id: 'cat-13', title: 'Textured Charcoal (Applied)', tag: 'Textured', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/textured-charcoal-applied.jpeg' },
-  { id: 'cat-14', title: 'Textured Charcoal (Raw)', tag: 'Textured', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/textured-charcoal-raw.jpeg' },
+type PublicCatalogProduct = {
+  lotId: string;
+  title?: string;
+  tag?: string;
+  lotNo?: string;
+  description?: string;
+  primaryImageUrl?: string | null;
+  imageUrls?: string[];
+  saleRatePerSqM?: number | null;
+  availableQuantity?: number;
+};
+
+const FALLBACK_DESCRIPTION =
+  'Part of our exclusive showroom collection, renowned for depth of texture and presence in luxury architectural spaces. Hand-selected for grain quality and aesthetic clarity.';
+
+const CATALOGUE_ITEMS: CatalogueItem[] = [
+  { id: 'cat-1', title: 'Royal Ebony Burl', tag: 'Exotic Series', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5110.JPG', imageUrls: ['https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5110.JPG'], description: FALLBACK_DESCRIPTION },
+  { id: 'cat-2', title: 'Smoked Walnut', tag: 'Premium', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5118.JPG', imageUrls: ['https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5118.JPG'], description: FALLBACK_DESCRIPTION },
+  { id: 'cat-3', title: 'Textured Ash', tag: 'Textured', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5119.JPG', imageUrls: ['https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5119.JPG'], description: FALLBACK_DESCRIPTION },
+  { id: 'cat-4', title: 'Dark Fumed Oak', tag: 'Heritage', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5121.JPG', imageUrls: ['https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5121.JPG'], description: FALLBACK_DESCRIPTION },
+  { id: 'cat-5', title: 'Golden Teak Crown', tag: 'Classic', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5339.JPG', imageUrls: ['https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5339.JPG'], description: FALLBACK_DESCRIPTION },
+  { id: 'cat-6', title: 'Chestnut Grain', tag: 'Classic', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5341.JPG', imageUrls: ['https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5341.JPG'], description: FALLBACK_DESCRIPTION },
+  { id: 'cat-7', title: 'Wenge Fine Line', tag: 'Modern', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5343.JPG', imageUrls: ['https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5343.JPG'], description: FALLBACK_DESCRIPTION },
+  { id: 'cat-8', title: 'Silver Grey Fluted', tag: 'Fluted', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5874.JPG', imageUrls: ['https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_5874.JPG'], description: FALLBACK_DESCRIPTION },
+  { id: 'cat-9', title: 'Nordic Charcoal', tag: 'Minimalist', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_6041.JPG', imageUrls: ['https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/IMG_6041.JPG'], description: FALLBACK_DESCRIPTION },
+  { id: 'cat-10', title: 'Noir Etched Wood', tag: 'Etched', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/DSC05814.JPG', imageUrls: ['https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/DSC05814.JPG'], description: FALLBACK_DESCRIPTION },
+  { id: 'cat-11', title: 'Geometric Array', tag: 'Bespoke', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/DSC06765.JPG', imageUrls: ['https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/DSC06765.JPG'], description: FALLBACK_DESCRIPTION },
+  { id: 'cat-12', title: 'Veneer Swatch Collection', tag: 'Reference', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/C1311FB5-0B7A-4C65-B51D-A9E9F996F3A6.jpg', imageUrls: ['https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/C1311FB5-0B7A-4C65-B51D-A9E9F996F3A6.jpg'], description: FALLBACK_DESCRIPTION },
+  { id: 'cat-13', title: 'Textured Charcoal (Applied)', tag: 'Textured', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/textured-charcoal-applied.jpeg', imageUrls: ['https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/textured-charcoal-applied.jpeg'], description: FALLBACK_DESCRIPTION },
+  { id: 'cat-14', title: 'Textured Charcoal (Raw)', tag: 'Textured', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/textured-charcoal-raw.jpeg', imageUrls: ['https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/textured-charcoal-raw.jpeg'], description: FALLBACK_DESCRIPTION },
 ];
 
 export default function Catalogue() {
-  const [selectedItem, setSelectedItem] = useState<typeof CATALOGUE_ITEMS[0] | null>(null);
+  const [inventoryItems, setInventoryItems] = useState<CatalogueItem[]>([]);
+  const [selectedItem, setSelectedItem] = useState<CatalogueItem | null>(null);
+  const [activeImage, setActiveImage] = useState<string | null>(null);
+  const items = inventoryItems.length > 0 ? inventoryItems : CATALOGUE_ITEMS;
 
   useEffect(() => {
     window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
+    if (!API_URL) return;
+    const controller = new AbortController();
+    fetch(`${API_URL}/public/catalog/products`, { signal: controller.signal })
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}`))))
+      .then((data: { products?: PublicCatalogProduct[] }) => {
+        const products = (data.products ?? [])
+          .map((product, index): CatalogueItem | null => {
+            const images = [
+              product.primaryImageUrl ?? '',
+              ...(Array.isArray(product.imageUrls) ? product.imageUrls : []),
+            ].filter((url, imageIndex, list) => url && list.indexOf(url) === imageIndex);
+            if (images.length === 0) return null;
+            return {
+              id: product.lotId,
+              title: product.title || `Veneer Lot ${product.lotNo ?? index + 1}`,
+              tag: product.tag || 'In Stock',
+              image: images[0],
+              imageUrls: images,
+              description: product.description || FALLBACK_DESCRIPTION,
+              lotNo: product.lotNo,
+              priceLabel: typeof product.saleRatePerSqM === 'number'
+                ? `Rs ${Math.round(product.saleRatePerSqM)} / sq.m`
+                : undefined,
+              stockLabel: typeof product.availableQuantity === 'number'
+                ? `${Math.round(product.availableQuantity)} sheets available`
+                : undefined,
+            };
+          })
+          .filter((item): item is CatalogueItem => item !== null);
+        setInventoryItems(products);
+      })
+      .catch(() => {
+        setInventoryItems([]);
+      });
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
@@ -83,7 +152,7 @@ export default function Catalogue() {
 
         {/* Masonry/Grid Layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 gap-y-16">
-          {CATALOGUE_ITEMS.map((item, index) => (
+          {items.map((item, index) => (
               <motion.div
               key={item.id}
               initial={{ opacity: 0, y: 30 }}
@@ -91,7 +160,10 @@ export default function Catalogue() {
               transition={{ duration: 0.8, delay: index * 0.1, ease: 'easeOut' }}
               viewport={{ once: true, margin: '-50px' }}
               className="group cursor-pointer flex flex-col"
-              onClick={() => setSelectedItem(item)}
+              onClick={() => {
+                setSelectedItem(item);
+                setActiveImage(item.image);
+              }}
             >
               <div className="relative w-full aspect-[4/3] md:aspect-square overflow-hidden mb-6 bg-black">
                 <motion.img 
@@ -125,6 +197,11 @@ export default function Catalogue() {
                 <h3 className="text-2xl font-serif text-white tracking-wide group-hover:text-gold transition-colors duration-300">
                   {item.title}
                 </h3>
+                {(item.priceLabel || item.stockLabel) && (
+                  <p className="mt-2 text-xs uppercase tracking-[0.18em] text-wood-medium">
+                    {[item.priceLabel, item.stockLabel].filter(Boolean).join(' | ')}
+                  </p>
+                )}
               </div>
             </motion.div>
           ))}
@@ -163,11 +240,25 @@ export default function Catalogue() {
               <div className="w-full md:w-[65%] h-[50vh] md:h-[85vh] relative flex items-center justify-center p-4 md:p-8 bg-black">
                 <motion.img 
                   layoutId={`catalogue-img-${selectedItem.id}`}
-                  src={selectedItem.image} 
+                  src={activeImage ?? selectedItem.image}
                   alt={selectedItem.title} 
                   className="max-w-full max-h-full object-contain shadow-2xl"
                   referrerPolicy="no-referrer"
                 />
+                {selectedItem.imageUrls.length > 1 && (
+                  <div className="absolute left-4 right-4 bottom-4 flex gap-3 overflow-x-auto py-2">
+                    {selectedItem.imageUrls.map((url) => (
+                      <button
+                        key={url}
+                        type="button"
+                        onClick={() => setActiveImage(url)}
+                        className={`h-16 w-16 shrink-0 overflow-hidden border ${url === (activeImage ?? selectedItem.image) ? 'border-gold' : 'border-white/20'} bg-black`}
+                      >
+                        <img src={url} alt="" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
               
               <div className="w-full md:w-[35%] p-8 md:p-12 flex flex-col justify-center bg-[#0A0A0A] relative h-full shrink-0">
@@ -184,8 +275,15 @@ export default function Catalogue() {
                 <div className="w-12 h-[1px] bg-white/20 mb-8" />
                 
                 <p className="text-wood-light text-sm md:text-base font-light leading-relaxed mb-10">
-                  Part of our exclusive showroom collection, renowned for its unparalleled depth of texture and monumental presence in luxury architectural spaces. Hand-selected for exceptional grain quality and aesthetic brilliance.
+                  {selectedItem.description}
                 </p>
+                {(selectedItem.priceLabel || selectedItem.stockLabel || selectedItem.lotNo) && (
+                  <div className="space-y-2 text-sm text-wood-medium mb-8">
+                    {selectedItem.lotNo && <div>Lot {selectedItem.lotNo}</div>}
+                    {selectedItem.priceLabel && <div>{selectedItem.priceLabel}</div>}
+                    {selectedItem.stockLabel && <div>{selectedItem.stockLabel}</div>}
+                  </div>
+                )}
 
                 <EnquiryDialog defaultMessage={`Hi, I would like to request pricing for the ${selectedItem.title} veneer. Please let me know the details.`}>
                   <Button
