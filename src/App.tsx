@@ -46,6 +46,7 @@ import emailjs from '@emailjs/browser';
 import { useContent } from './content/ContentProvider';
 import { applyHomeSeo, applySiteStructuredData } from './content/seo';
 import type { CollectionItem } from './content/types';
+import { fetchCatalogCategories, type CatalogCategory } from './catalog/api';
 
 // --- Types & Constants ---
 
@@ -516,6 +517,81 @@ const Collections = () => {
           </motion.div>
         )}
       </AnimatePresence>
+    </section>
+  );
+};
+
+/**
+ * "Browse by Veneer Type" strip — the live catalogue categories managed from
+ * the showroom app (Website → Catalogue Categories). Inventory published to a
+ * category appears on its /veneers/<id> page and in the catalogue filter.
+ */
+const VeneerTypes = () => {
+  const [categories, setCategories] = useState<CatalogCategory[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchCatalogCategories()
+      .then((list) => {
+        if (!cancelled) setCategories(list);
+      })
+      .catch(() => {
+        if (!cancelled) setCategories([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (categories.length === 0) return null;
+
+  return (
+    <section aria-labelledby="veneer-types-heading" className="py-24 bg-wood-dark border-y border-wood-light/10">
+      <div className="container mx-auto px-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-14 gap-6">
+          <div className="max-w-2xl">
+            <span className="text-gold uppercase tracking-[0.3em] text-xs font-bold mb-4 block">Browse by Veneer Type</span>
+            <h2 id="veneer-types-heading" className="text-4xl md:text-5xl font-serif text-white">
+              The Catalogue, <span className="italic text-gold">by Species</span>
+            </h2>
+          </div>
+          <a href="/catalogue" onClick={(e) => { e.preventDefault(); navigate('/catalogue'); }}>
+            <Button variant="link" className="text-gold p-0 h-auto uppercase tracking-[0.2em] text-xs font-bold group">
+              View Full Catalogue <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-2" />
+            </Button>
+          </a>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          {categories.map((category) => (
+            <a
+              key={category.id}
+              href={category.href}
+              onClick={(e) => { e.preventDefault(); navigate(category.href); }}
+              className="group relative aspect-[4/5] overflow-hidden bg-wood-medium/20 border border-wood-light/10"
+              aria-label={`Browse ${category.title} veneers`}
+            >
+              {category.image ? (
+                <img
+                  src={category.image}
+                  alt={`${category.title} veneer`}
+                  className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+                  loading="lazy"
+                  decoding="async"
+                  referrerPolicy="no-referrer"
+                />
+              ) : null}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-5">
+                <h3 className="text-xl font-serif text-white group-hover:text-gold transition-colors">{category.title}</h3>
+                <p className="text-[10px] uppercase tracking-[0.25em] text-wood-light mt-1">
+                  {category.productCount > 0 ? `${category.productCount} in stock` : category.tag || 'Enquire'}
+                </p>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
     </section>
   );
 };
@@ -1220,10 +1296,12 @@ export default function App() {
   }, [content.site.settings]);
 
   const isCatalogue = currentPath === '/catalogue' || currentPath.startsWith('/catalogue/');
+  // Any /veneers/<slug> renders the category page; unknown slugs get a 404
+  // inside it once the live category list has loaded.
   const veneerSlug = currentPath.startsWith('/veneers/')
-    ? (currentPath.split('/veneers/')[1]?.replace(/\/$/, '') as 'burl' | 'teak' | 'oak' | undefined)
+    ? currentPath.split('/veneers/')[1]?.replace(/\/$/, '') || undefined
     : undefined;
-  const isVeneerPage = veneerSlug === 'burl' || veneerSlug === 'teak' || veneerSlug === 'oak';
+  const isVeneerPage = Boolean(veneerSlug);
 
   // Per-route: update title, canonical, og:url, og:title, og:description
   useEffect(() => {
@@ -1256,6 +1334,7 @@ export default function App() {
           <main>
             <Hero />
             <Collections />
+            <VeneerTypes />
             <Offers />
             <Showroom />
             <ShowroomGallery />

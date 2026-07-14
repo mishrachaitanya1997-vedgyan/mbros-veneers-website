@@ -4,8 +4,12 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, ArrowLeft, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EnquiryDialog } from '@/components/EnquiryDialog';
-
-const API_URL = ((import.meta.env.VITE_API_URL as string | undefined) ?? '').replace(/\/$/, '');
+import {
+  fetchCatalogCategories,
+  fetchCatalogProducts,
+  type CatalogCategory,
+  type CatalogProduct,
+} from './catalog/api';
 
 // Shared SPA navigate helper (mirrors App.tsx)
 const navigate = (path: string) => {
@@ -21,20 +25,9 @@ type CatalogueItem = {
   imageUrls: string[];
   description: string;
   lotNo?: string;
+  veneerType?: string | null;
   priceLabel?: string;
   stockLabel?: string;
-};
-
-type PublicCatalogProduct = {
-  lotId: string;
-  title?: string;
-  tag?: string;
-  lotNo?: string;
-  description?: string;
-  primaryImageUrl?: string | null;
-  imageUrls?: string[];
-  saleRatePerSqM?: number | null;
-  availableQuantity?: number;
 };
 
 const FALLBACK_DESCRIPTION =
@@ -57,52 +50,81 @@ const CATALOGUE_ITEMS: CatalogueItem[] = [
   { id: 'cat-14', title: 'Textured Charcoal (Raw)', tag: 'Textured', image: 'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/textured-charcoal-raw.jpeg', imageUrls: ['https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/catalogue_asset/textured-charcoal-raw.jpeg'], description: FALLBACK_DESCRIPTION },
 ];
 
+/** Map an API product to the card shape this page renders. */
+export function toCatalogueItem(product: CatalogProduct, index: number): CatalogueItem | null {
+  const images = [
+    product.primaryImageUrl ?? '',
+    ...(Array.isArray(product.imageUrls) ? product.imageUrls : []),
+  ].filter((url, imageIndex, list) => url && list.indexOf(url) === imageIndex);
+  if (images.length === 0) return null;
+  return {
+    id: product.lotId,
+    title: product.title || `Veneer Lot ${product.lotNo ?? index + 1}`,
+    tag: product.tag || 'In Stock',
+    image: images[0],
+    imageUrls: images,
+    description: product.description || FALLBACK_DESCRIPTION,
+    lotNo: product.lotNo,
+    veneerType: product.veneerType ?? null,
+    priceLabel: typeof product.saleRatePerSqM === 'number'
+      ? `Rs ${Math.round(product.saleRatePerSqM)} / sq.m`
+      : undefined,
+    stockLabel: typeof product.availableQuantity === 'number'
+      ? `${Math.round(product.availableQuantity)} sheets available`
+      : undefined,
+  };
+}
+
 export default function Catalogue() {
   const [inventoryItems, setInventoryItems] = useState<CatalogueItem[]>([]);
+  const [categories, setCategories] = useState<CatalogCategory[]>([]);
   const [selectedItem, setSelectedItem] = useState<CatalogueItem | null>(null);
   const [activeImage, setActiveImage] = useState<string | null>(null);
-  const items = inventoryItems.length > 0 ? inventoryItems : CATALOGUE_ITEMS;
+  // Veneer-type filter, shareable via /catalogue?type=teak
+  const [activeType, setActiveType] = useState<string | null>(
+    () => new URLSearchParams(window.location.search).get('type')
+  );
+
+  const filteredInventory = activeType
+    ? inventoryItems.filter((item) => item.veneerType === activeType)
+    : inventoryItems;
+  const items = inventoryItems.length > 0 ? filteredInventory : CATALOGUE_ITEMS;
+
+  const selectType = (type: string | null) => {
+    setActiveType(type);
+    const url = type ? `/catalogue?type=${encodeURIComponent(type)}` : '/catalogue';
+    window.history.replaceState({}, '', url);
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   useEffect(() => {
-    if (!API_URL) return;
-    const controller = new AbortController();
-    fetch(`${API_URL}/public/catalog/products`, { signal: controller.signal })
-      .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}`))))
-      .then((data: { products?: PublicCatalogProduct[] }) => {
-        const products = (data.products ?? [])
-          .map((product, index): CatalogueItem | null => {
-            const images = [
-              product.primaryImageUrl ?? '',
-              ...(Array.isArray(product.imageUrls) ? product.imageUrls : []),
-            ].filter((url, imageIndex, list) => url && list.indexOf(url) === imageIndex);
-            if (images.length === 0) return null;
-            return {
-              id: product.lotId,
-              title: product.title || `Veneer Lot ${product.lotNo ?? index + 1}`,
-              tag: product.tag || 'In Stock',
-              image: images[0],
-              imageUrls: images,
-              description: product.description || FALLBACK_DESCRIPTION,
-              lotNo: product.lotNo,
-              priceLabel: typeof product.saleRatePerSqM === 'number'
-                ? `Rs ${Math.round(product.saleRatePerSqM)} / sq.m`
-                : undefined,
-              stockLabel: typeof product.availableQuantity === 'number'
-                ? `${Math.round(product.availableQuantity)} sheets available`
-                : undefined,
-            };
-          })
-          .filter((item): item is CatalogueItem => item !== null);
-        setInventoryItems(products);
+    let cancelled = false;
+    // Fetch everything once and filter client-side — the list is capped at 100.
+    fetchCatalogProducts()
+      .then((products) => {
+        if (cancelled) return;
+        setInventoryItems(
+          products
+            .map(toCatalogueItem)
+            .filter((item): item is CatalogueItem => item !== null)
+        );
       })
       .catch(() => {
-        setInventoryItems([]);
+        if (!cancelled) setInventoryItems([]);
       });
-    return () => controller.abort();
+    fetchCatalogCategories()
+      .then((list) => {
+        if (!cancelled) setCategories(list);
+      })
+      .catch(() => {
+        if (!cancelled) setCategories([]);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -149,6 +171,50 @@ export default function Catalogue() {
             </p>
           </div>
         </div>
+
+        {/* Veneer-type filter — live categories managed from the showroom app */}
+        {inventoryItems.length > 0 && categories.length > 0 && (
+          <div className="flex flex-wrap gap-3 mb-16" role="group" aria-label="Filter by veneer type">
+            <button
+              type="button"
+              onClick={() => selectType(null)}
+              className={`px-5 py-2.5 text-[11px] uppercase tracking-[0.25em] font-bold border transition-all duration-300 ${
+                activeType === null
+                  ? 'bg-gold text-wood-dark border-gold'
+                  : 'bg-transparent text-wood-light border-white/20 hover:border-gold hover:text-gold'
+              }`}
+            >
+              All ({inventoryItems.length})
+            </button>
+            {categories.map((category) => {
+              const count = inventoryItems.filter((item) => item.veneerType === category.id).length;
+              if (count === 0) return null;
+              return (
+                <button
+                  key={category.id}
+                  type="button"
+                  onClick={() => selectType(category.id)}
+                  className={`px-5 py-2.5 text-[11px] uppercase tracking-[0.25em] font-bold border transition-all duration-300 ${
+                    activeType === category.id
+                      ? 'bg-gold text-wood-dark border-gold'
+                      : 'bg-transparent text-wood-light border-white/20 hover:border-gold hover:text-gold'
+                  }`}
+                >
+                  {category.title} ({count})
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {items.length === 0 && (
+          <p className="text-wood-light text-lg font-light py-16">
+            Nothing is published in this collection right now — new lots arrive weekly.{' '}
+            <button type="button" onClick={() => selectType(null)} className="text-gold hover:underline">
+              View everything in stock →
+            </button>
+          </p>
+        )}
 
         {/* Masonry/Grid Layout */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 gap-y-16">
