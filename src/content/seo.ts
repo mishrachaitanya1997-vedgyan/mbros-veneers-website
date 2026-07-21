@@ -1,14 +1,7 @@
-import type { CategoryPage, Faq, SeoHome, SiteSettings } from './types';
+import type { SiteSettings } from './siteSettings';
 
-// Small DOM helpers to keep SEO in sync with editable CMS content. The site is a
-// client-rendered SPA, so we update <title>, meta, and JSON-LD at runtime
-// (matching the existing imperative pattern in App.tsx). JSON-LD blocks that are
-// content-driven are tagged with data-cms-id so we upsert rather than duplicate.
-
-function setMetaByName(name: string, content: string): void {
-  const el = document.querySelector<HTMLMetaElement>(`meta[name="${name}"]`);
-  if (el) el.content = content;
-}
+// Small DOM helpers to keep SEO in sync as routes change. The site is a
+// client-rendered SPA, so we update <title>, meta, and JSON-LD at runtime.
 
 function setMetaByProp(property: string, content: string): void {
   const el = document.querySelector<HTMLMetaElement>(`meta[property="${property}"]`);
@@ -33,18 +26,6 @@ function upsertJsonLd(id: string, data: unknown): void {
   el.textContent = JSON.stringify(data);
 }
 
-function faqPageSchema(faqs: Faq[]) {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faqs.map(({ q, a }) => ({
-      '@type': 'Question',
-      name: q,
-      acceptedAnswer: { '@type': 'Answer', text: a },
-    })),
-  };
-}
-
 function localBusinessSchema(s: SiteSettings) {
   return {
     '@context': 'https://schema.org',
@@ -55,7 +36,6 @@ function localBusinessSchema(s: SiteSettings) {
     telephone: s.phone,
     email: s.email,
     priceRange: s.priceRange,
-    hasMap: s.mapUrl,
     address: {
       '@type': 'PostalAddress',
       streetAddress: s.address.street,
@@ -76,38 +56,16 @@ function localBusinessSchema(s: SiteSettings) {
   };
 }
 
-/**
- * Site-wide LocalBusiness structured data (address, phone, hours, socials).
- * Called on every route so editing Site Settings updates the schema everywhere,
- * replacing the previously-static block in index.html.
- */
+/** Site-wide LocalBusiness structured data (address, phone, hours, socials). */
 export function applySiteStructuredData(settings: SiteSettings): void {
   upsertJsonLd('local-business', localBusinessSchema(settings));
 }
 
-/** Homepage SEO + FAQ structured data, all editable from the CMS. */
-export function applyHomeSeo(seo: SeoHome, settings: SiteSettings, faqs: Faq[]): void {
-  document.title = seo.title;
-  setMetaByName('description', seo.description);
-  if (seo.keywords) setMetaByName('keywords', seo.keywords);
-  setCanonical(seo.canonical);
-  setMetaByProp('og:url', seo.canonical);
-  setMetaByProp('og:title', seo.title);
-  setMetaByProp('og:description', seo.description);
-  if (seo.ogImage) setMetaByProp('og:image', seo.ogImage);
-  setMetaByName('twitter:title', seo.title);
-  setMetaByName('twitter:description', seo.description);
-  if (seo.ogImage) setMetaByName('twitter:image', seo.ogImage);
-  applySiteStructuredData(settings);
-  upsertJsonLd('home-faq', faqPageSchema(faqs));
-}
-
-/** Category page (burl/teak/oak) SEO + FAQ structured data. */
-export function applyCategorySeo(page: CategoryPage): void {
+/** Per-route title/canonical/OG tags for a veneer category page. */
+export function applyCategorySeo(page: { title: string; canonical: string; ogTitle: string; ogDesc: string }): void {
   document.title = page.title;
   setCanonical(page.canonical);
   setMetaByProp('og:title', page.ogTitle);
   setMetaByProp('og:description', page.ogDesc);
   setMetaByProp('og:url', page.canonical);
-  upsertJsonLd('category-faq', faqPageSchema(page.faqs));
 }

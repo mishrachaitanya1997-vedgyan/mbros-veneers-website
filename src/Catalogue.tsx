@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ArrowLeft, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import {
   type CatalogCategory,
   type CatalogProduct,
 } from './catalog/api';
+import { thumbnailUrlFor } from './catalog/imageUrl';
 
 // Shared SPA navigate helper (mirrors App.tsx)
 const navigate = (path: string) => {
@@ -25,7 +26,7 @@ type CatalogueItem = {
   imageUrls: string[];
   description: string;
   lotNo?: string;
-  veneerType?: string | null;
+  catalogueCategoryId?: string | null;
   priceLabel?: string;
   stockLabel?: string;
 };
@@ -65,7 +66,7 @@ export function toCatalogueItem(product: CatalogProduct, index: number): Catalog
     imageUrls: images,
     description: product.description || FALLBACK_DESCRIPTION,
     lotNo: product.lotNo,
-    veneerType: product.veneerType ?? null,
+    catalogueCategoryId: product.catalogueCategoryId ?? null,
     priceLabel: typeof product.saleRatePerSqM === 'number'
       ? `Rs ${Math.round(product.saleRatePerSqM)} / sq.m`
       : undefined,
@@ -73,6 +74,75 @@ export function toCatalogueItem(product: CatalogProduct, index: number): Catalog
       ? `${Math.round(product.availableQuantity)} sheets available`
       : undefined,
   };
+}
+
+/** Category title for an item's `catalogueCategoryId`, e.g. "Recon Veneer". */
+function categoryTitleFor(categories: CatalogCategory[], id?: string | null): string | undefined {
+  if (!id) return undefined;
+  return categories.find((c) => c.id === id)?.title;
+}
+
+function CatalogueCard({
+  item,
+  index,
+  categoryLabel,
+  onSelect,
+}: {
+  key?: React.Key;
+  item: CatalogueItem;
+  index: number;
+  categoryLabel?: string;
+  onSelect: () => void;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, delay: index * 0.1, ease: 'easeOut' }}
+      viewport={{ once: true, margin: '-50px' }}
+      className="group cursor-pointer flex flex-col"
+      onClick={onSelect}
+    >
+      <div className="relative w-full aspect-[4/3] md:aspect-square overflow-hidden mb-6 bg-black">
+        <motion.img
+          layoutId={`catalogue-img-${item.id}`}
+          src={item.image}
+          alt={`${item.title} — ${item.tag} wood veneer from M Bros Veneers Nagpur`}
+          className="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110 opacity-90 group-hover:opacity-100"
+          loading="lazy"
+          decoding="async"
+          referrerPolicy="no-referrer"
+        />
+
+        {/* Overlay grading */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+        {/* Maximize icon */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 scale-90 group-hover:scale-100">
+          <div className="w-16 h-16 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 text-white">
+            <Maximize2 className="w-6 h-6" aria-hidden="true" />
+          </div>
+        </div>
+
+        {/* Subtle category label overlaid on the image (falls back to the tag). */}
+        <div className="absolute bottom-4 left-4 text-white/70 text-[9px] uppercase tracking-[0.3em] font-light drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+          {categoryLabel ?? item.tag}
+        </div>
+      </div>
+
+      <div className="flex flex-col">
+        <span className="text-wood-light text-xs font-serif italic mb-2">No. {String(index + 1).padStart(2, '0')}</span>
+        <h3 className="text-2xl font-serif text-white tracking-wide group-hover:text-gold transition-colors duration-300">
+          {item.title}
+        </h3>
+        {(item.priceLabel || item.stockLabel) && (
+          <p className="mt-2 text-xs uppercase tracking-[0.18em] text-wood-medium">
+            {[item.priceLabel, item.stockLabel].filter(Boolean).join(' | ')}
+          </p>
+        )}
+      </div>
+    </motion.div>
+  );
 }
 
 export default function Catalogue() {
@@ -86,9 +156,34 @@ export default function Catalogue() {
   );
 
   const filteredInventory = activeType
-    ? inventoryItems.filter((item) => item.veneerType === activeType)
+    ? inventoryItems.filter((item) => item.catalogueCategoryId === activeType)
     : inventoryItems;
   const items = inventoryItems.length > 0 ? filteredInventory : CATALOGUE_ITEMS;
+
+  // "All" view: group live inventory into its catalogue categories (Fluted
+  // Veneer, Recon Veneer, ...) instead of one mixed grid. A specific filter or
+  // the static fallback list still renders as a single flat grid.
+  const groupedByCategory = useMemo(() => {
+    if (activeType !== null || inventoryItems.length === 0) return null;
+    const byCategory = new Map<string, CatalogueItem[]>();
+    const uncategorised: CatalogueItem[] = [];
+    for (const item of inventoryItems) {
+      if (!item.catalogueCategoryId) {
+        uncategorised.push(item);
+        continue;
+      }
+      const bucket = byCategory.get(item.catalogueCategoryId) ?? [];
+      bucket.push(item);
+      byCategory.set(item.catalogueCategoryId, bucket);
+    }
+    const groups = categories
+      .map((category) => ({ id: category.id, title: category.title, items: byCategory.get(category.id) ?? [] }))
+      .filter((group) => group.items.length > 0);
+    if (uncategorised.length > 0) {
+      groups.push({ id: '__other__', title: 'More from the Showroom', items: uncategorised });
+    }
+    return groups;
+  }, [activeType, inventoryItems, categories]);
 
   const selectType = (type: string | null) => {
     setActiveType(type);
@@ -187,7 +282,7 @@ export default function Catalogue() {
               All ({inventoryItems.length})
             </button>
             {categories.map((category) => {
-              const count = inventoryItems.filter((item) => item.veneerType === category.id).length;
+              const count = inventoryItems.filter((item) => item.catalogueCategoryId === category.id).length;
               if (count === 0) return null;
               return (
                 <button
@@ -216,62 +311,58 @@ export default function Catalogue() {
           </p>
         )}
 
-        {/* Masonry/Grid Layout */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 gap-y-16">
-          {items.map((item, index) => (
-              <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: index * 0.1, ease: 'easeOut' }}
-              viewport={{ once: true, margin: '-50px' }}
-              className="group cursor-pointer flex flex-col"
-              onClick={() => {
-                setSelectedItem(item);
-                setActiveImage(item.image);
-              }}
-            >
-              <div className="relative w-full aspect-[4/3] md:aspect-square overflow-hidden mb-6 bg-black">
-                <motion.img 
-                  layoutId={`catalogue-img-${item.id}`}
-                  src={item.image} 
-                  alt={`${item.title} — ${item.tag} wood veneer from M Bros Veneers Nagpur`}
-                  className="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-110 opacity-90 group-hover:opacity-100"
-                  loading="lazy"
-                  decoding="async"
-                  referrerPolicy="no-referrer"
-                />
-                
-                {/* Overlay grading */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                
-                {/* Maximize icon */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 scale-90 group-hover:scale-100">
-                  <div className="w-16 h-16 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center border border-white/10 text-white">
-                    <Maximize2 className="w-6 h-6" aria-hidden="true" />
-                  </div>
+        {/* Masonry/Grid Layout — grouped by category in the "All" view, flat otherwise */}
+        {groupedByCategory ? (
+          <div className="space-y-20">
+            {groupedByCategory.map((group) => (
+              <section key={group.id} aria-labelledby={`cat-heading-${group.id}`}>
+                <div className="flex items-baseline justify-between mb-8 gap-4">
+                  <h2 id={`cat-heading-${group.id}`} className="text-2xl md:text-3xl font-serif text-white">
+                    {group.title} <span className="text-wood-medium text-sm font-sans">({group.items.length})</span>
+                  </h2>
+                  {group.id !== '__other__' && (
+                    <button
+                      type="button"
+                      onClick={() => selectType(group.id)}
+                      className="text-gold text-[11px] uppercase tracking-[0.2em] font-bold hover:underline shrink-0"
+                    >
+                      View all →
+                    </button>
+                  )}
                 </div>
-
-                {/* Tag */}
-                <div className="absolute top-4 left-4 bg-black/60 text-gold text-[10px] uppercase tracking-[0.3em] px-3 py-1.5 backdrop-blur-md border border-white/10">
-                  {item.tag}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 gap-y-16">
+                  {group.items.map((item, index) => (
+                    <CatalogueCard
+                      key={item.id}
+                      item={item}
+                      index={index}
+                      categoryLabel={group.id !== '__other__' ? group.title : undefined}
+                      onSelect={() => {
+                        setSelectedItem(item);
+                        setActiveImage(item.image);
+                      }}
+                    />
+                  ))}
                 </div>
-              </div>
-
-              <div className="flex flex-col">
-                <span className="text-wood-light text-xs font-serif italic mb-2">No. {String(index + 1).padStart(2, '0')}</span>
-                <h3 className="text-2xl font-serif text-white tracking-wide group-hover:text-gold transition-colors duration-300">
-                  {item.title}
-                </h3>
-                {(item.priceLabel || item.stockLabel) && (
-                  <p className="mt-2 text-xs uppercase tracking-[0.18em] text-wood-medium">
-                    {[item.priceLabel, item.stockLabel].filter(Boolean).join(' | ')}
-                  </p>
-                )}
-              </div>
-            </motion.div>
-          ))}
-        </div>
+              </section>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 gap-y-16">
+            {items.map((item, index) => (
+              <CatalogueCard
+                key={item.id}
+                item={item}
+                index={index}
+                categoryLabel={categoryTitleFor(categories, item.catalogueCategoryId)}
+                onSelect={() => {
+                  setSelectedItem(item);
+                  setActiveImage(item.image);
+                }}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Lightbox / Expanded View */}
@@ -320,7 +411,7 @@ export default function Catalogue() {
                         onClick={() => setActiveImage(url)}
                         className={`h-16 w-16 shrink-0 overflow-hidden border ${url === (activeImage ?? selectedItem.image) ? 'border-gold' : 'border-white/20'} bg-black`}
                       >
-                        <img src={url} alt="" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
+                        <img src={thumbnailUrlFor(url)} alt="" className="h-full w-full object-cover" referrerPolicy="no-referrer" />
                       </button>
                     ))}
                   </div>

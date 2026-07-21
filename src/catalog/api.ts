@@ -11,6 +11,7 @@ export type CatalogCategory = {
   description: string;
   image: string;
   tag: string;
+  inventoryCategory: string;
   href: string;
   productCount: number;
 };
@@ -21,6 +22,7 @@ export type CatalogProduct = {
   tag?: string;
   lotNo?: string;
   veneerType?: string | null;
+  catalogueCategoryId?: string | null;
   slug?: string;
   description?: string;
   primaryImageUrl?: string | null;

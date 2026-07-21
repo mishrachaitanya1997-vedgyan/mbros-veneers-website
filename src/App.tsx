@@ -3,15 +3,13 @@ import { useState, useEffect } from 'react';
 import Catalogue from './Catalogue';
 import VeneerCategoryPage from './VeneerCategoryPage';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Menu, 
-  X, 
-  Instagram, 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Calendar, 
-  ChevronRight, 
+import {
+  Menu,
+  X,
+  Instagram,
+  MapPin,
+  Phone,
+  Mail,
   ArrowRight,
   Award,
   ShieldCheck,
@@ -20,7 +18,6 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EnquiryDialog } from '@/components/EnquiryDialog';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -43,9 +40,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import emailjs from '@emailjs/browser';
-import { useContent } from './content/ContentProvider';
-import { applyHomeSeo, applySiteStructuredData } from './content/seo';
-import type { CollectionItem } from './content/types';
+import { SITE_SETTINGS } from './content/siteSettings';
+import { applySiteStructuredData } from './content/seo';
 import { fetchCatalogCategories, type CatalogCategory } from './catalog/api';
 
 // --- Types & Constants ---
@@ -88,7 +84,6 @@ const Navbar = () => {
   const navLinks = [
     { name: 'Home', href: '/' },
     { name: 'Catalogue', href: '/catalogue' },
-    { name: 'Collections', href: '#collections' },
     { name: 'Showroom', href: '#showroom' },
     { name: 'Contact', href: '#contact' },
   ];
@@ -339,9 +334,9 @@ const Hero = () => {
               Nagpur's best veneer shop for natural and decorative veneer sheets — teak, oak, burl, walnut, and fluted panels. Trusted by architects and interior designers across Central India.
             </p>
             <div className="flex flex-col sm:flex-row gap-6">
-              <a href="#collections">
+              <a href="/catalogue" onClick={(e) => { e.preventDefault(); navigate('/catalogue'); }}>
                 <Button className="bg-gold text-wood-dark hover:bg-white transition-all rounded-none px-10 py-8 text-sm uppercase tracking-[0.2em] font-bold shadow-2xl w-full sm:w-auto">
-                  View Collections
+                  View Catalogue
                 </Button>
               </a>
               <AppointmentDialog>
@@ -363,160 +358,6 @@ const Hero = () => {
         <span className="text-[10px] uppercase tracking-[0.2em]">Scroll</span>
         <div className="w-[1px] h-12 bg-white/30" />
       </motion.div>
-    </section>
-  );
-};
-
-const Collections = () => {
-  const { collections } = useContent().home;
-  const [selectedItem, setSelectedItem] = useState<CollectionItem | null>(null);
-
-  useEffect(() => {
-    if (selectedItem) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => { document.body.style.overflow = 'unset'; };
-  }, [selectedItem]);
-
-  return (
-    <section id="collections" className="py-32 md:py-48 bg-wood-cream relative overflow-hidden">
-      {/* Decorative background texture */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none wood-grain-overlay" />
-      
-      <div className="container mx-auto px-6 relative z-10">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-24 gap-8">
-          <div className="max-w-3xl">
-            <span className="text-wood-medium uppercase tracking-[0.3em] text-xs font-bold mb-4 block">Veneer Collections — Nagpur</span>
-            <h2 className="text-5xl md:text-7xl font-serif text-wood-dark mb-8">
-              Natural <span className="italic">Veneer Sheets</span>
-            </h2>
-            <p className="text-wood-medium text-xl font-light leading-relaxed">
-              {collections.intro}
-            </p>
-          </div>
-          <a href="/catalogue">
-            <Button variant="link" className="text-wood-dark p-0 h-auto uppercase tracking-[0.2em] text-xs font-bold group">
-              View Full Catalog <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-2" />
-            </Button>
-          </a>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-8">
-          {collections.items.map((item, index) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              viewport={{ once: true }}
-            >
-              <Card 
-                className="group cursor-pointer overflow-hidden border-none rounded-none bg-transparent h-full flex flex-col"
-                onClick={() => setSelectedItem(item)}
-              >
-                <CardContent className="p-0 flex flex-col h-full">
-                  <div className="relative aspect-[4/5] overflow-hidden mb-8 shadow-2xl shrink-0">
-                    <motion.img 
-                      layoutId={`card-img-${item.id}`}
-                      src={item.image} 
-                      alt={`${item.title} wood veneer collection at M Bros Veneers`}
-                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                      loading="lazy"
-                      decoding="async"
-                      referrerPolicy="no-referrer"
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-500" />
-                    <div className="absolute top-6 right-6 bg-wood-dark/90 text-gold text-[10px] uppercase tracking-[0.3em] px-4 py-2 backdrop-blur-md border border-gold/20">
-                      {item.tag}
-                    </div>
-                  </div>
-                  <h3 className="text-3xl font-serif text-wood-dark mb-3 tracking-tight">{item.title}</h3>
-                  <p className="text-wood-medium text-base font-light leading-relaxed mb-6 line-clamp-2">{item.description}</p>
-                  {/* Real anchor for crawlability + visual CTA */}
-                  <a
-                    href={item.href}
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); navigate(item.href); }}
-                    className="text-[11px] uppercase tracking-[0.3em] font-bold text-gold flex items-center gap-3 hover:gap-5 transition-all duration-500"
-                    aria-label={`View ${item.title} veneer collection`}
-                  >
-                    Discover Collection <ArrowRight size={14} aria-hidden="true" />
-                  </a>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-
-      {/* Expanded View Lightbox */}
-      <AnimatePresence>
-        {selectedItem && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10"
-          >
-            <div 
-              className="absolute inset-0 bg-wood-dark/95 backdrop-blur-2xl cursor-zoom-out" 
-              onClick={() => setSelectedItem(null)} 
-            />
-            
-            <motion.div
-              initial={{ scale: 0.95, y: 20, opacity: 0 }}
-              animate={{ scale: 1, y: 0, opacity: 1 }}
-              exit={{ scale: 0.95, y: 20, opacity: 0 }}
-              transition={{ delay: 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="relative w-full max-w-7xl bg-wood-cream shadow-2xl flex flex-col lg:flex-row overflow-hidden z-10 max-h-[90vh]"
-            >
-              <button 
-                onClick={() => setSelectedItem(null)}
-                className="absolute top-6 right-6 z-20 w-12 h-12 bg-black/20 hover:bg-black/40 backdrop-blur-md flex items-center justify-center text-white transition-all rounded-full group outline-none"
-              >
-                <X className="w-6 h-6 group-hover:rotate-90 transition-transform duration-500" />
-              </button>
-
-              <div className="w-full lg:w-[60%] h-[40vh] lg:h-[85vh] relative overflow-hidden bg-black shrink-0">
-                <motion.img 
-                  layoutId={`card-img-${selectedItem.id}`}
-                  src={selectedItem.image} 
-                  alt={selectedItem.title} 
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
-              </div>
-              
-              <div className="w-full lg:w-[40%] p-8 lg:p-16 flex flex-col justify-center bg-wood-cream relative h-full shrink-0 overflow-y-auto custom-scrollbar">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-gold/40 to-transparent" />
-                <span className="text-gold uppercase tracking-[0.4em] text-[10px] font-bold mb-6 block">
-                  Archive No. {selectedItem.id.substring(0, 3).toUpperCase()} {new Date().getFullYear()}
-                </span>
-                <h3 className="text-4xl lg:text-6xl font-serif text-wood-dark mb-6 tracking-tight leading-tight">
-                  {selectedItem.title}
-                </h3>
-                <div className="w-12 h-[1px] bg-wood-light/30 mb-8" />
-                <p className="text-wood-medium text-lg lg:text-xl font-light leading-relaxed mb-10">
-                  {selectedItem.description}
-                </p>
-                
-                <div className="flex items-center gap-4 text-xs font-bold uppercase tracking-widest text-wood-dark mb-12">
-                  <span className="px-4 py-2 border border-wood-light/20">{selectedItem.tag} Collection</span>
-                </div>
-
-                <EnquiryDialog defaultMessage={`Hi, I would like to inquire about the availability of the ${selectedItem.title} veneer. Please provide me with more details.`}>
-                  <Button className="w-full bg-wood-dark text-wood-cream hover:bg-gold hover:text-wood-dark transition-all duration-500 rounded-none py-8 uppercase tracking-[0.2em] font-bold group flex items-center justify-center gap-4">
-                    Inquire Availability
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
-                  </Button>
-                </EnquiryDialog>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </section>
   );
 };
@@ -550,9 +391,9 @@ const VeneerTypes = () => {
       <div className="container mx-auto px-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-14 gap-6">
           <div className="max-w-2xl">
-            <span className="text-gold uppercase tracking-[0.3em] text-xs font-bold mb-4 block">Browse by Veneer Type</span>
+            <span className="text-gold uppercase tracking-[0.3em] text-xs font-bold mb-4 block">Browse Collections</span>
             <h2 id="veneer-types-heading" className="text-4xl md:text-5xl font-serif text-white">
-              The Catalogue, <span className="italic text-gold">by Species</span>
+              The Catalogue, <span className="italic text-gold">by Collection</span>
             </h2>
           </div>
           <a href="/catalogue" onClick={(e) => { e.preventDefault(); navigate('/catalogue'); }}>
@@ -569,12 +410,12 @@ const VeneerTypes = () => {
               href={category.href}
               onClick={(e) => { e.preventDefault(); navigate(category.href); }}
               className="group relative aspect-[4/5] overflow-hidden bg-wood-medium/20 border border-wood-light/10"
-              aria-label={`Browse ${category.title} veneers`}
+              aria-label={`Browse ${category.title}`}
             >
               {category.image ? (
                 <img
                   src={category.image}
-                  alt={`${category.title} veneer`}
+                  alt={category.title}
                   className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
                   loading="lazy"
                   decoding="async"
@@ -856,128 +697,8 @@ const CuratedPalettes = () => {
   );
 };
 
-const HomeFAQ = () => {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
-  const faqs = useContent().home.faqs.items;
-
-  return (
-    <section className="py-32 md:py-48 bg-wood-cream border-t border-wood-light/20" aria-labelledby="faq-heading">
-      <div className="container mx-auto px-6">
-        <div className="max-w-4xl mx-auto">
-
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="mb-20 text-center"
-          >
-            <span className="text-wood-medium uppercase tracking-[0.4em] text-xs font-bold mb-6 block">
-              Expert Knowledge
-            </span>
-            <h2 id="faq-heading" className="text-5xl md:text-6xl font-serif text-wood-dark mb-6">
-              Frequently Asked <span className="italic">Questions</span>
-            </h2>
-            <p className="text-wood-medium text-lg font-light max-w-xl mx-auto leading-relaxed">
-              Everything you need to know about sourcing premium wood veneer sheets from our Nagpur showroom.
-            </p>
-          </motion.div>
-
-          {/* FAQ accordion */}
-          <div>
-            {faqs.map((faq, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.04 }}
-                viewport={{ once: true }}
-                className="border-t border-wood-light/20 last:border-b last:border-wood-light/20"
-              >
-                <button
-                  onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                  className="w-full flex items-center justify-between py-8 text-left group"
-                  aria-expanded={openIndex === index}
-                  aria-controls={`faq-answer-${index}`}
-                >
-                  <div className="flex items-start gap-8 pr-8">
-                    <span className="text-gold font-serif text-sm shrink-0 mt-1 select-none" aria-hidden="true">
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <h3 className="font-serif text-xl md:text-2xl text-wood-dark group-hover:text-wood-medium transition-colors duration-300 leading-snug">
-                      {faq.q}
-                    </h3>
-                  </div>
-                  <div
-                    className={`w-10 h-10 shrink-0 border flex items-center justify-center transition-all duration-300 ${
-                      openIndex === index
-                        ? 'bg-wood-dark border-wood-dark'
-                        : 'bg-transparent border-wood-light/40 group-hover:border-gold'
-                    }`}
-                    aria-hidden="true"
-                  >
-                    <span
-                      className={`text-xl leading-none font-light transition-colors duration-300 ${
-                        openIndex === index ? 'text-gold' : 'text-wood-dark'
-                      }`}
-                    >
-                      {openIndex === index ? '−' : '+'}
-                    </span>
-                  </div>
-                </button>
-
-                <AnimatePresence initial={false}>
-                  {openIndex === index && (
-                    <motion.div
-                      id={`faq-answer-${index}`}
-                      key="answer"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                      className="overflow-hidden"
-                    >
-                      <div className="flex gap-8 pb-10">
-                        {/* Spacer matching number column */}
-                        <span className="text-sm shrink-0 opacity-0 select-none" aria-hidden="true">00</span>
-                        <p className="text-wood-medium text-lg font-light leading-relaxed">
-                          {faq.a}
-                        </p>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Bottom CTA */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="mt-16 pt-16 border-t border-wood-light/20 flex flex-col sm:flex-row items-center justify-between gap-8"
-          >
-            <p className="font-serif text-2xl md:text-3xl text-wood-dark italic">
-              Still have questions?
-            </p>
-            <a href="#contact">
-              <Button className="bg-wood-dark text-wood-cream hover:bg-gold hover:text-wood-dark transition-all duration-300 rounded-none px-10 py-6 uppercase tracking-[0.2em] text-xs font-bold">
-                Speak to an Expert
-              </Button>
-            </a>
-          </motion.div>
-
-        </div>
-      </div>
-    </section>
-  );
-};
-
 const ContactSection = () => {
-  const settings = useContent().site.settings;
+  const settings = SITE_SETTINGS;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{ type: 'success' | 'error' | null, message: string }>({ type: null, message: '' });
   const form = useForm<z.infer<typeof contactSchema>>({
@@ -1240,7 +961,6 @@ const Footer = () => {
             <ul className="space-y-4 text-sm text-wood-medium">
               <li><a href="/" className="hover:text-gold transition-colors">Home</a></li>
               <li><a href="/catalogue" className="hover:text-gold transition-colors">Catalogue</a></li>
-              <li><a href="#collections" className="hover:text-gold transition-colors">Collections</a></li>
               <li><a href="#showroom" className="hover:text-gold transition-colors">Showroom</a></li>
               <li><a href="#contact" className="hover:text-gold transition-colors">Contact</a></li>
               <li>
@@ -1278,8 +998,14 @@ const Footer = () => {
   );
 };
 
+const HOME_SEO = {
+  title: 'Wood Veneers in Nagpur | M Bros Veneers Showroom',
+  description:
+    "Nagpur's leading veneer showroom. Shop 200+ natural & decorative veneer sheets for furniture, doors, cabinets & interiors. Trusted by architects since 1990.",
+  canonical: 'https://mbrosveneers.com/',
+};
+
 export default function App() {
-  const content = useContent();
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
 
   useEffect(() => {
@@ -1290,10 +1016,10 @@ export default function App() {
     return () => window.removeEventListener('popstate', onNavigation);
   }, []);
 
-  // Site-wide LocalBusiness structured data on every route (CMS-editable).
+  // Site-wide LocalBusiness structured data on every route.
   useEffect(() => {
-    applySiteStructuredData(content.site.settings);
-  }, [content.site.settings]);
+    applySiteStructuredData(SITE_SETTINGS);
+  }, []);
 
   const isCatalogue = currentPath === '/catalogue' || currentPath.startsWith('/catalogue/');
   // Any /veneers/<slug> renders the category page; unknown slugs get a 404
@@ -1317,10 +1043,13 @@ export default function App() {
       if (ogTitle) ogTitle.content = 'Natural Veneer Sheets India | M Bros Veneers Catalogue';
       if (ogDesc) ogDesc.content = 'Browse 200+ premium wood veneer sheets: teak, oak, walnut, burl, fluted & exotic. India\'s trusted decorative veneer supplier. Order from Nagpur.';
     } else if (!isVeneerPage) {
-      // Homepage SEO + LocalBusiness/FAQ structured data, all CMS-editable.
-      applyHomeSeo(content.seo.home, content.site.settings, content.home.faqs.items);
+      document.title = HOME_SEO.title;
+      if (canonical) canonical.href = HOME_SEO.canonical;
+      if (ogUrl) ogUrl.content = HOME_SEO.canonical;
+      if (ogTitle) ogTitle.content = HOME_SEO.title;
+      if (ogDesc) ogDesc.content = HOME_SEO.description;
     }
-  }, [isCatalogue, isVeneerPage, content]);
+  }, [isCatalogue, isVeneerPage]);
 
   return (
     <div className="min-h-screen selection:bg-gold selection:text-wood-dark">
@@ -1333,13 +1062,11 @@ export default function App() {
         <>
           <main>
             <Hero />
-            <Collections />
             <VeneerTypes />
             <Offers />
             <Showroom />
             <ShowroomGallery />
             <CuratedPalettes />
-            <HomeFAQ />
             <ContactSection />
           </main>
           <Footer />

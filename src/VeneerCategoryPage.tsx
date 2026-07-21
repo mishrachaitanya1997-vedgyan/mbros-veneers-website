@@ -3,9 +3,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, ArrowRight, MapPin, Phone, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EnquiryDialog } from '@/components/EnquiryDialog';
-import { useContent } from './content/ContentProvider';
+import { SITE_SETTINGS } from './content/siteSettings';
 import { applyCategorySeo } from './content/seo';
-import type { CategoryPage } from './content/types';
 import {
   fetchCatalogCategories,
   fetchCatalogProducts,
@@ -22,20 +21,25 @@ const navigate = (path: string) => {
 const FALLBACK_HERO =
   'https://pub-7357fd3d80834c06ae56c110336d6783.r2.dev/brown%20wood%20textured%20veneer%20with%20light%20colored%20sofa%20in%20the%20foreground.jpeg';
 
+type CategoryPageConfig = {
+  title: string;
+  h1: string;
+  subtitle: string;
+  description: string;
+  canonical: string;
+  ogTitle: string;
+  ogDesc: string;
+  heroImage: string;
+};
+
 /**
- * Landing page for one veneer-type category, e.g. /veneers/teak.
- *
- * Copy comes from two CMS layers: the hand-written SEO pages (pages.burl/teak/
- * oak — rich copy + FAQs) when one exists for the slug, otherwise the
- * catalogue category itself (managed in the app's Website → Catalogue
- * Categories editor). The product grid is live showroom stock for the
- * category; the static CMS items are only a fallback when nothing is
- * published in it.
+ * Landing page for one veneer-type category, e.g. /veneers/teak. Copy is
+ * derived from the catalogue category itself (managed in the app's Website →
+ * Catalogue Categories editor); the product grid is live showroom stock for
+ * the category.
  */
 export default function VeneerCategoryPage({ slug }: { slug: string }) {
-  const { pages, site } = useContent();
-  const settings = site.settings;
-  const cmsPage = (pages as Partial<Record<string, CategoryPage>>)[slug];
+  const settings = SITE_SETTINGS;
 
   const [categories, setCategories] = useState<CatalogCategory[] | null>(null);
   const [products, setProducts] = useState<CatalogProduct[]>([]);
@@ -63,23 +67,20 @@ export default function VeneerCategoryPage({ slug }: { slug: string }) {
 
   const category = categories?.find((entry) => entry.id === slug);
 
-  // Assemble the page config: rich CMS page when present, else the category.
-  const config: CategoryPage | null = useMemo(() => {
-    if (cmsPage) return cmsPage;
+  // Assemble the page config from the catalogue category.
+  const config: CategoryPageConfig | null = useMemo(() => {
     if (!category) return null;
     return {
-      title: `${category.title} Veneer Sheets in Nagpur | M Bros Veneers`,
-      h1: `${category.title} Veneers`,
+      title: `${category.title} in Nagpur | M Bros Veneers`,
+      h1: category.title,
       subtitle: category.description,
       description: category.description,
       canonical: `https://mbrosveneers.com/veneers/${category.id}`,
-      ogTitle: `${category.title} Veneer Sheets in Nagpur | M Bros Veneers`,
+      ogTitle: `${category.title} in Nagpur | M Bros Veneers`,
       ogDesc: category.description,
       heroImage: category.image || FALLBACK_HERO,
-      items: [],
-      faqs: [],
     };
-  }, [cmsPage, category]);
+  }, [category]);
 
   useEffect(() => {
     if (config) applyCategorySeo(config);
@@ -127,9 +128,7 @@ export default function VeneerCategoryPage({ slug }: { slug: string }) {
     .filter((item): item is NonNullable<typeof item> => item !== null);
 
   const showLive = liveItems.length > 0;
-  const gridItems = showLive
-    ? liveItems
-    : config.items.map((item) => ({ ...item, lotNo: undefined, stockLabel: undefined }));
+  const gridItems = liveItems;
 
   return (
     <div className="min-h-screen bg-wood-dark text-wood-cream font-sans">
@@ -248,23 +247,6 @@ export default function VeneerCategoryPage({ slug }: { slug: string }) {
             </a>
           </div>
         </section>
-
-        {/* FAQ — structured for rich results */}
-        {config.faqs.length > 0 && (
-          <section aria-labelledby="faq-heading" className="mb-24 max-w-3xl">
-            <h2 id="faq-heading" className="text-3xl font-serif text-white mb-10">
-              Frequently Asked <span className="italic text-gold">Questions</span>
-            </h2>
-            <div className="space-y-8">
-              {config.faqs.map((faq, i) => (
-                <div key={i} className="border-b border-wood-light/10 pb-8">
-                  <h3 className="text-lg font-serif text-white mb-3">{faq.q}</h3>
-                  <p className="text-wood-light font-light leading-relaxed">{faq.a}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
 
         {/* CTA */}
         <section aria-labelledby="contact-cta" className="bg-wood-medium/20 border border-wood-light/10 p-10 md:p-16">
