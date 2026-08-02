@@ -97,8 +97,8 @@ export default function SharedProjectPage({ token }: { token: string }) {
 
   return (
     <div className="min-h-screen bg-wood-cream">
-      <header className="border-b border-wood-light/20 bg-wood-dark text-wood-cream">
-        <div className="max-w-5xl mx-auto px-6 py-10">
+      <header className="bg-wood-dark text-wood-cream shadow-md">
+        <div className="max-w-5xl mx-auto px-6 py-12">
           <p className="text-xs uppercase tracking-[0.3em] text-gold mb-3">
             Curated selection
           </p>
@@ -129,7 +129,7 @@ export default function SharedProjectPage({ token }: { token: string }) {
             {data.items.map((item) => (
               <div
                 key={item.lotId}
-                className="bg-white rounded-none border border-wood-light/20 overflow-hidden flex flex-col"
+                className="bg-white rounded-xl border border-wood-light/20 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 overflow-hidden flex flex-col"
               >
                 <div className="aspect-square bg-wood-light/10 overflow-hidden">
                   {item.primaryImageUrl ? (
@@ -145,7 +145,7 @@ export default function SharedProjectPage({ token }: { token: string }) {
                     </div>
                   )}
                 </div>
-                <div className="p-4 flex-1 flex flex-col">
+                <div className="p-5 flex-1 flex flex-col">
                   <h3 className="font-serif text-lg text-wood-dark">{item.title}</h3>
                   <p className="text-xs text-wood-medium uppercase tracking-widest mt-1">
                     {[item.shadeFamily, item.finish].filter(Boolean).join(' · ')}
@@ -164,32 +164,38 @@ export default function SharedProjectPage({ token }: { token: string }) {
           </div>
         )}
 
-        <div className="grid md:grid-cols-2 gap-10 border-t border-wood-light/20 pt-10">
-          <div>
-            <h2 className="font-serif text-2xl text-wood-dark mb-3">
+        <div className="grid md:grid-cols-2 gap-10 border-t border-wood-light/20 pt-12">
+          <div className="bg-white rounded-xl border border-wood-light/20 shadow-sm p-6 md:p-8">
+            <h2 className="font-serif text-2xl text-wood-dark mb-4">
               Visit the showroom
             </h2>
-            <div className="space-y-2 text-wood-medium text-sm">
+            <div className="space-y-3 text-wood-medium text-sm">
               {data.seller.address && (
-                <p className="flex items-start gap-2">
-                  <MapPin className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <p className="flex items-start gap-3">
+                  <span className="mt-0.5 flex-shrink-0 rounded-full bg-wood-dark/5 p-1.5">
+                    <MapPin className="w-4 h-4 text-wood-dark" />
+                  </span>
                   {data.seller.address}
                 </p>
               )}
               {data.seller.phone && (
-                <p className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 flex-shrink-0" />
+                <p className="flex items-center gap-3">
+                  <span className="flex-shrink-0 rounded-full bg-wood-dark/5 p-1.5">
+                    <Phone className="w-4 h-4 text-wood-dark" />
+                  </span>
                   {data.seller.phone}
                 </p>
               )}
               {data.seller.email && (
-                <p className="flex items-center gap-2">
-                  <Mail className="w-4 h-4 flex-shrink-0" />
+                <p className="flex items-center gap-3">
+                  <span className="flex-shrink-0 rounded-full bg-wood-dark/5 p-1.5">
+                    <Mail className="w-4 h-4 text-wood-dark" />
+                  </span>
                   {data.seller.email}
                 </p>
               )}
             </div>
-            <p className="mt-5 text-xs text-wood-light">
+            <p className="mt-6 text-xs text-wood-light leading-relaxed">
               Prices and availability are indicative and confirmed in the final
               showroom quotation. This is not an invoice or stock reservation.
             </p>
@@ -206,7 +212,7 @@ function StockBadge({ status }: { status: string }) {
   const isAvailable = status === 'in_stock' || status === 'low_stock';
   return (
     <span
-      className={`text-[10px] uppercase tracking-widest px-2 py-1 rounded-full ${
+      className={`text-[10px] font-semibold uppercase tracking-widest px-2.5 py-1 rounded-full ${
         isAvailable
           ? 'bg-green-100 text-green-800'
           : 'bg-wood-light/20 text-wood-medium'
@@ -247,10 +253,12 @@ function EnquiryForm({ token }: { token: string }) {
 
   if (submitted) {
     return (
-      <div className="bg-white border border-wood-light/20 p-6 flex flex-col items-center text-center justify-center">
-        <CheckCircle2 className="w-10 h-10 text-green-600 mb-3" />
+      <div className="bg-white rounded-xl border border-wood-light/20 shadow-sm p-8 flex flex-col items-center text-center justify-center">
+        <div className="rounded-full bg-green-100 p-3 mb-4">
+          <CheckCircle2 className="w-8 h-8 text-green-600" />
+        </div>
         <h3 className="font-serif text-xl text-wood-dark">Enquiry sent</h3>
-        <p className="text-wood-medium text-sm mt-2">
+        <p className="text-wood-medium text-sm mt-2 leading-relaxed">
           The showroom will reach out shortly. Your architect/designer has been
           credited for this referral.
         </p>
@@ -259,8 +267,8 @@ function EnquiryForm({ token }: { token: string }) {
   }
 
   return (
-    <div>
-      <h2 className="font-serif text-2xl text-wood-dark mb-3">
+    <div className="bg-white rounded-xl border border-wood-light/20 shadow-sm p-6 md:p-8">
+      <h2 className="font-serif text-2xl text-wood-dark mb-4">
         Interested? Send an enquiry
       </h2>
       <Form {...form}>
@@ -274,7 +282,7 @@ function EnquiryForm({ token }: { token: string }) {
                   Name
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder="Your name" {...field} className="rounded-none border-wood-light/40 bg-white h-12" />
+                  <Input placeholder="Your name" {...field} className="rounded-lg border-wood-light/40 bg-white h-12" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -289,7 +297,7 @@ function EnquiryForm({ token }: { token: string }) {
                   Phone
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder="+91" {...field} className="rounded-none border-wood-light/40 bg-white h-12" />
+                  <Input placeholder="+91" {...field} className="rounded-lg border-wood-light/40 bg-white h-12" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -304,7 +312,7 @@ function EnquiryForm({ token }: { token: string }) {
                   Email (optional)
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder="email@example.com" {...field} className="rounded-none border-wood-light/40 bg-white h-12" />
+                  <Input placeholder="email@example.com" {...field} className="rounded-lg border-wood-light/40 bg-white h-12" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -322,7 +330,7 @@ function EnquiryForm({ token }: { token: string }) {
                   <Textarea
                     placeholder="Tell us about your project and timeline..."
                     {...field}
-                    className="rounded-none border-wood-light/40 bg-white min-h-[100px]"
+                    className="rounded-lg border-wood-light/40 bg-white min-h-[100px]"
                   />
                 </FormControl>
                 <FormMessage />
@@ -333,12 +341,12 @@ function EnquiryForm({ token }: { token: string }) {
           <Button
             disabled={isSubmitting || !turnstileToken}
             type="submit"
-            className="w-full bg-wood-dark text-wood-cream hover:bg-gold hover:text-wood-dark transition-all duration-300 rounded-none h-14 uppercase tracking-[0.2em] font-bold"
+            className="w-full bg-wood-dark text-wood-cream hover:bg-gold hover:text-wood-dark transition-all duration-300 rounded-lg h-14 uppercase tracking-[0.2em] font-bold shadow-sm hover:shadow-md"
           >
             {isSubmitting ? 'Sending...' : 'Send enquiry'}
           </Button>
           {submitError && (
-            <div className="px-4 py-3 text-sm font-medium border-l-4 border-red-500 text-red-700 bg-red-50">
+            <div className="px-4 py-3 text-sm font-medium rounded-lg border-l-4 border-red-500 text-red-700 bg-red-50">
               {submitError}
             </div>
           )}

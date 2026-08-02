@@ -107,6 +107,7 @@ export function PrivacyPolicyPage() {
           <li><strong>Business and project records</strong> — leads, selection slips, quotations, orders, referrals, and Design Partner statements created in the course of doing business with us.</li>
           <li><strong>Photos and videos</strong> — inventory and product images captured by staff, and any samples or reference images shared with us.</li>
           <li><strong>Device and push notification tokens</strong> — used to deliver in-app and push notifications (e.g. quote updates, sample reminders) to staff and Design Partner devices.</li>
+          <li><strong>Connected Instagram/Facebook account data</strong> — when a staff member links our business Facebook Page and Instagram Business account via Facebook Login, we receive the Page/Instagram account ID, name, profile picture, and an access token, as described below.</li>
           <li><strong>Diagnostics</strong> — basic crash and error logs, only if diagnostic reporting is enabled, used solely to fix app problems.</li>
         </ul>
       </Section>
@@ -131,6 +132,29 @@ export function PrivacyPolicyPage() {
           <li><strong>Meta (WhatsApp Cloud API, Instagram/Facebook Graph API)</strong> — used only for staff-initiated customer notifications and social media posting from business-owned accounts; customer data is not shared with Meta for advertising purposes.</li>
         </ul>
         <p>We do not share your information with third parties for their own marketing purposes.</p>
+      </Section>
+
+      <Section id="instagram-facebook" title="Connecting Instagram &amp; Facebook">
+        <p>
+          Authorized staff can connect M Bros Veneers' own Facebook Page and its linked Instagram Business account to
+          the Showroom app using Facebook Login for Business, in order to publish photos and videos of our products
+          (such as veneer and plywood stock) directly from the app.
+        </p>
+        <p><strong>What we access:</strong> basic information about the connected Page and Instagram Business account
+          (name, ID, profile picture) and permission to publish posts, photos, and videos on behalf of that account.
+        </p>
+        <p><strong>What we don't do:</strong> we do not access personal messages, followers' personal data, or any
+          customer's personal Instagram or Facebook account. This access is never used for advertising, and no
+          customer data is shared with Meta through this integration.
+        </p>
+        <p><strong>Storage and security:</strong> access tokens issued by Meta are stored securely on our backend
+          (Google Cloud Run) and are never exposed on end-user devices or shared with any other third party.
+        </p>
+        <p><strong>Revoking access:</strong> staff can disconnect the integration at any time from Settings in the
+          Showroom app, or by removing "M Bros Veneers Showroom" under Facebook Business Integrations in their own
+          Facebook settings. Disconnecting immediately revokes and deletes the stored access token; we retain it only
+          for as long as the integration stays connected.
+        </p>
       </Section>
 
       <Section id="retention" title="How long we keep information">
