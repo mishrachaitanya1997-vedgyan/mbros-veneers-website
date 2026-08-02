@@ -23,10 +23,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import emailjs from '@emailjs/browser';
+import { TurnstileWidget } from '@/components/TurnstileWidget';
+import { verifyTurnstileToken } from '@/src/turnstile';
+import { submitPublicLead } from '@/src/catalog/api';
 
 const contactSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
+  phone: z.string().trim().optional(),
   subject: z.string().min(2, "Subject is required"),
   message: z.string().min(10, "Message must be at least 10 characters"),
 });
@@ -39,11 +43,13 @@ interface EnquiryDialogProps {
 export function EnquiryDialog({ children, defaultMessage = "" }: EnquiryDialogProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{ type: 'success' | 'error' | null, message: string }>({ type: null, message: '' });
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const form = useForm<z.infer<typeof contactSchema>>({
     resolver: zodResolver(contactSchema),
     defaultValues: {
       name: "",
       email: "",
+      phone: "",
       subject: "",
       message: defaultMessage,
     },
@@ -54,6 +60,7 @@ export function EnquiryDialog({ children, defaultMessage = "" }: EnquiryDialogPr
     form.reset({
       name: form.getValues('name'),
       email: form.getValues('email'),
+      phone: form.getValues('phone'),
       subject: form.getValues('subject'),
       message: defaultMessage,
     });
@@ -62,7 +69,33 @@ export function EnquiryDialog({ children, defaultMessage = "" }: EnquiryDialogPr
   async function onSubmit(values: z.infer<typeof contactSchema>) {
     setIsSubmitting(true);
     setSubmitStatus({ type: null, message: '' });
+    if (!turnstileToken) {
+      setSubmitStatus({ type: 'error', message: 'Please complete the verification checkbox above.' });
+      setIsSubmitting(false);
+      return;
+    }
+    // Phone is optional here, but it's the only way to also create a CRM
+    // lead (the CRM dedupes contacts on phone). When given, the token is
+    // verified once, server-side, by that lead-creation call -- verifying it
+    // again client-side afterward would fail, since a Turnstile token can
+    // only be redeemed once. When phone is omitted, verify directly against
+    // our own Worker instead, since nothing else will.
+    const phone = values.phone?.trim();
     try {
+      if (phone) {
+        await submitPublicLead({
+          name: values.name,
+          phone,
+          email: values.email,
+          projectName: values.subject,
+          message: values.message,
+          botToken: turnstileToken,
+        });
+      } else if (!(await verifyTurnstileToken(turnstileToken))) {
+        setSubmitStatus({ type: 'error', message: 'Verification failed. Please complete the checkbox above and try again.' });
+        setIsSubmitting(false);
+        return;
+      }
       await emailjs.send(
         'service_cgxlu6r',
         'template_5i87ik5',
@@ -124,6 +157,19 @@ export function EnquiryDialog({ children, defaultMessage = "" }: EnquiryDialogPr
             />
             <FormField
               control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-wood-dark uppercase tracking-widest text-xs font-bold">Phone (optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="+91 00000 00000" {...field} className="rounded-none border-wood-light/40 bg-white h-12" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="subject"
               render={({ field }) => (
                 <FormItem>
@@ -148,7 +194,8 @@ export function EnquiryDialog({ children, defaultMessage = "" }: EnquiryDialogPr
                 </FormItem>
               )}
             />
-            <Button disabled={isSubmitting} type="submit" className="w-full bg-wood-dark text-wood-cream hover:bg-gold hover:text-wood-dark transition-all duration-300 rounded-none h-14 uppercase tracking-[0.2em] font-bold mt-2">
+            <TurnstileWidget onToken={setTurnstileToken} />
+            <Button disabled={isSubmitting || !turnstileToken} type="submit" className="w-full bg-wood-dark text-wood-cream hover:bg-gold hover:text-wood-dark transition-all duration-300 rounded-none h-14 uppercase tracking-[0.2em] font-bold mt-2">
               {isSubmitting ? "Sending..." : "Send Message"}
             </Button>
             {submitStatus.type && (

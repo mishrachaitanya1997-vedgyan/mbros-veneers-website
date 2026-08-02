@@ -11,6 +11,7 @@ import {
   type CatalogCategory,
   type CatalogProduct,
 } from './catalog/api';
+import { toCatalogueItem } from './Catalogue';
 
 // Shared SPA navigate helper (mirrors App.tsx / Catalogue.tsx)
 const navigate = (path: string) => {
@@ -111,20 +112,7 @@ export default function VeneerCategoryPage({ slug }: { slug: string }) {
   }
 
   const liveItems = products
-    .map((product) => {
-      const image = product.primaryImageUrl ?? product.imageUrls?.[0] ?? '';
-      if (!image) return null;
-      return {
-        title: product.title || `Veneer Lot ${product.lotNo ?? ''}`.trim(),
-        tag: product.tag || 'In Stock',
-        image,
-        lotNo: product.lotNo,
-        stockLabel:
-          typeof product.availableQuantity === 'number'
-            ? `${Math.round(product.availableQuantity)} sheets available`
-            : undefined,
-      };
-    })
+    .map((product, index) => toCatalogueItem(product, index))
     .filter((item): item is NonNullable<typeof item> => item !== null);
 
   const showLive = liveItems.length > 0;
@@ -230,10 +218,13 @@ export default function VeneerCategoryPage({ slug }: { slug: string }) {
                   </div>
                   <h3 className="text-xl font-serif text-white mb-2">{item.title}</h3>
                   <p className="text-wood-light text-sm font-light">
-                    {item.stockLabel
-                      ? `${item.stockLabel}${item.lotNo ? ` · Lot ${item.lotNo}` : ''} — contact us for pricing.`
-                      : 'Available at our Nagpur showroom. Contact us for pricing.'}
+                    {item.priceLabel ?? 'Contact us for pricing.'}
                   </p>
+                  {(item.stockLabel || item.lotNo) && (
+                    <p className="mt-1 text-xs uppercase tracking-[0.18em] text-wood-medium">
+                      {[item.stockLabel, item.lotNo ? `Lot ${item.lotNo}` : undefined].filter(Boolean).join(' · ')}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>

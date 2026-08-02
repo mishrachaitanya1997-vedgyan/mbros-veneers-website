@@ -2,6 +2,8 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import Catalogue from './Catalogue';
 import VeneerCategoryPage from './VeneerCategoryPage';
+import SharedProjectPage from './SharedProjectPage';
+import { PrivacyPolicyPage, PrivacyChoicesPage, TermsOfUsePage, SupportPage } from './LegalPages';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Menu,
@@ -18,6 +20,9 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EnquiryDialog } from '@/components/EnquiryDialog';
+import { TurnstileWidget } from '@/components/TurnstileWidget';
+import { verifyTurnstileToken } from './turnstile';
+import { submitPublicLead } from './catalog/api';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -57,6 +62,7 @@ const appointmentSchema = z.object({
 const contactSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
+  phone: z.string().trim().optional(),
   subject: z.string().min(2, "Subject is required"),
   message: z.string().min(10, "Message must be at least 10 characters"),
 });
@@ -182,6 +188,7 @@ const Navbar = () => {
 const AppointmentDialog = ({ children }: { children: React.ReactElement }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{ type: 'success' | 'error' | null, message: string }>({ type: null, message: '' });
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const form = useForm<z.infer<typeof appointmentSchema>>({
     resolver: zodResolver(appointmentSchema),
     defaultValues: {
@@ -196,7 +203,25 @@ const AppointmentDialog = ({ children }: { children: React.ReactElement }) => {
   async function onSubmit(values: z.infer<typeof appointmentSchema>) {
     setIsSubmitting(true);
     setSubmitStatus({ type: null, message: '' });
+    if (!turnstileToken) {
+      setSubmitStatus({ type: 'error', message: 'Please complete the verification checkbox above.' });
+      setIsSubmitting(false);
+      return;
+    }
     try {
+      // Phone is always required on this form, so it always creates a CRM
+      // lead too -- the token is verified once, server-side, by this call
+      // (see EnquiryDialog.tsx for why it must not also be verified client-side).
+      await submitPublicLead({
+        name: values.name,
+        phone: values.phone,
+        email: values.email,
+        projectName: 'Private viewing request',
+        message: values.message?.trim()
+          ? values.message.trim()
+          : `Requested a private showroom viewing for ${values.date}.`,
+        botToken: turnstileToken,
+      });
       await emailjs.send(
         'service_cgxlu6r',
         'template_fppwhse',
@@ -282,7 +307,8 @@ const AppointmentDialog = ({ children }: { children: React.ReactElement }) => {
                 </FormItem>
               )}
             />
-            <Button disabled={isSubmitting} type="submit" className="w-full bg-wood-dark text-wood-cream hover:bg-wood-medium rounded-none uppercase tracking-widest">
+            <TurnstileWidget onToken={setTurnstileToken} />
+            <Button disabled={isSubmitting || !turnstileToken} type="submit" className="w-full bg-wood-dark text-wood-cream hover:bg-wood-medium rounded-none uppercase tracking-widest">
               {isSubmitting ? "Sending..." : "Confirm Request"}
             </Button>
             {submitStatus.type && (
@@ -403,32 +429,33 @@ const VeneerTypes = () => {
           </a>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 md:gap-8">
           {categories.map((category) => (
             <a
               key={category.id}
               href={category.href}
               onClick={(e) => { e.preventDefault(); navigate(category.href); }}
-              className="group relative aspect-[4/5] overflow-hidden bg-wood-medium/20 border border-wood-light/10"
+              className="group flex flex-col items-center text-center"
               aria-label={`Browse ${category.title}`}
             >
-              {category.image ? (
-                <img
-                  src={category.image}
-                  alt={category.title}
-                  className="absolute inset-0 w-full h-full object-cover opacity-70 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
-                  loading="lazy"
-                  decoding="async"
-                  referrerPolicy="no-referrer"
-                />
-              ) : null}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-5">
-                <h3 className="text-xl font-serif text-white group-hover:text-gold transition-colors">{category.title}</h3>
-                <p className="text-[10px] uppercase tracking-[0.25em] text-wood-light mt-1">
-                  {category.productCount > 0 ? `${category.productCount} in stock` : category.tag || 'Enquire'}
-                </p>
+              <div className="w-full aspect-square overflow-hidden bg-wood-medium/10 border border-wood-light/10 mb-4">
+                {category.image ? (
+                  <img
+                    src={category.image}
+                    alt={category.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    loading="lazy"
+                    decoding="async"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : null}
               </div>
+              <h3 className="text-sm md:text-base font-serif text-white group-hover:text-gold transition-colors">
+                {category.title}
+              </h3>
+              <p className="text-[10px] uppercase tracking-[0.25em] text-wood-light mt-1">
+                {category.productCount > 0 ? `${category.productCount} in stock` : category.tag || 'Enquire'}
+              </p>
             </a>
           ))}
         </div>
@@ -701,11 +728,13 @@ const ContactSection = () => {
   const settings = SITE_SETTINGS;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<{ type: 'success' | 'error' | null, message: string }>({ type: null, message: '' });
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const form = useForm<z.infer<typeof contactSchema>>({
     resolver: zodResolver(contactSchema),
     defaultValues: {
       name: "",
       email: "",
+      phone: "",
       subject: "",
       message: "",
     },
@@ -714,7 +743,29 @@ const ContactSection = () => {
   async function onSubmit(values: z.infer<typeof contactSchema>) {
     setIsSubmitting(true);
     setSubmitStatus({ type: null, message: '' });
+    if (!turnstileToken) {
+      setSubmitStatus({ type: 'error', message: 'Please complete the verification checkbox above.' });
+      setIsSubmitting(false);
+      return;
+    }
+    // See EnquiryDialog.tsx for why phone-present and phone-absent take
+    // different verification paths (a Turnstile token is single-use).
+    const phone = values.phone?.trim();
     try {
+      if (phone) {
+        await submitPublicLead({
+          name: values.name,
+          phone,
+          email: values.email,
+          projectName: values.subject,
+          message: values.message,
+          botToken: turnstileToken,
+        });
+      } else if (!(await verifyTurnstileToken(turnstileToken))) {
+        setSubmitStatus({ type: 'error', message: 'Verification failed. Please complete the checkbox above and try again.' });
+        setIsSubmitting(false);
+        return;
+      }
       await emailjs.send(
         'service_cgxlu6r',
         'template_5i87ik5',
@@ -782,6 +833,19 @@ const ContactSection = () => {
                   </div>
                   <FormField
                     control={form.control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone (optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="+91 00000 00000" {...field} className="rounded-none border-wood-light/40 h-12" />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
                     name="subject"
                     render={({ field }) => (
                       <FormItem>
@@ -806,8 +870,9 @@ const ContactSection = () => {
                       </FormItem>
                     )}
                   />
+                  <TurnstileWidget onToken={setTurnstileToken} />
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                    <Button disabled={isSubmitting} type="submit" className="w-full md:w-auto bg-wood-dark text-wood-cream hover:bg-wood-medium rounded-none px-12 py-6 uppercase tracking-widest font-bold">
+                    <Button disabled={isSubmitting || !turnstileToken} type="submit" className="w-full md:w-auto bg-wood-dark text-wood-cream hover:bg-wood-medium rounded-none px-12 py-6 uppercase tracking-widest font-bold">
                       {isSubmitting ? "Sending..." : "Send Message"}
                     </Button>
                     {submitStatus.type && (
@@ -1028,6 +1093,13 @@ export default function App() {
     ? currentPath.split('/veneers/')[1]?.replace(/\/$/, '') || undefined
     : undefined;
   const isVeneerPage = Boolean(veneerSlug);
+  const isLegalPage = ['/privacy', '/account-deletion', '/terms', '/support'].includes(currentPath);
+  // A Design Partner's client-facing project board — see SharedProjectPage.
+  // Sets its own title/robots meta, so it opts out of the SEO effect below.
+  const shareToken = currentPath.startsWith('/shared/')
+    ? currentPath.split('/shared/')[1]?.replace(/\/$/, '') || undefined
+    : undefined;
+  const isSharedPage = Boolean(shareToken);
 
   // Per-route: update title, canonical, og:url, og:title, og:description
   useEffect(() => {
@@ -1042,22 +1114,32 @@ export default function App() {
       if (ogUrl) ogUrl.content = 'https://mbrosveneers.com/catalogue';
       if (ogTitle) ogTitle.content = 'Natural Veneer Sheets India | M Bros Veneers Catalogue';
       if (ogDesc) ogDesc.content = 'Browse 200+ premium wood veneer sheets: teak, oak, walnut, burl, fluted & exotic. India\'s trusted decorative veneer supplier. Order from Nagpur.';
-    } else if (!isVeneerPage) {
+    } else if (!isVeneerPage && !isLegalPage && !isSharedPage) {
       document.title = HOME_SEO.title;
       if (canonical) canonical.href = HOME_SEO.canonical;
       if (ogUrl) ogUrl.content = HOME_SEO.canonical;
       if (ogTitle) ogTitle.content = HOME_SEO.title;
       if (ogDesc) ogDesc.content = HOME_SEO.description;
     }
-  }, [isCatalogue, isVeneerPage]);
+  }, [isCatalogue, isVeneerPage, isLegalPage, isSharedPage]);
 
   return (
     <div className="min-h-screen selection:bg-gold selection:text-wood-dark">
-      {!isCatalogue && !isVeneerPage && <Navbar />}
-      {isCatalogue ? (
+      {!isCatalogue && !isVeneerPage && !isLegalPage && !isSharedPage && <Navbar />}
+      {isSharedPage && shareToken ? (
+        <SharedProjectPage token={shareToken} />
+      ) : isCatalogue ? (
         <Catalogue />
       ) : isVeneerPage && veneerSlug ? (
         <VeneerCategoryPage slug={veneerSlug} />
+      ) : currentPath === '/privacy' ? (
+        <PrivacyPolicyPage />
+      ) : currentPath === '/account-deletion' ? (
+        <PrivacyChoicesPage />
+      ) : currentPath === '/terms' ? (
+        <TermsOfUsePage />
+      ) : currentPath === '/support' ? (
+        <SupportPage />
       ) : (
         <>
           <main>
