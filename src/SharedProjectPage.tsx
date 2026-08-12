@@ -22,6 +22,8 @@ import {
   type SharedProject,
 } from './catalog/api';
 import { thumbnailUrlFor } from './catalog/imageUrl';
+import { getAttribution } from './attribution';
+import { trackEvent } from './analytics';
 
 const enquirySchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -241,7 +243,13 @@ function EnquiryForm({ token }: { token: string }) {
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      await submitSharedProjectEnquiry({ ...values, shareToken: token, botToken: turnstileToken });
+      await submitSharedProjectEnquiry({
+        ...values,
+        shareToken: token,
+        botToken: turnstileToken,
+        attribution: getAttribution(),
+      });
+      trackEvent('generate_lead', { form: 'shared_project' });
       setSubmitted(true);
     } catch (error) {
       console.error(error);

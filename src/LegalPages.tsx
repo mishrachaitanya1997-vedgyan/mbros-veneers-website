@@ -103,13 +103,35 @@ export function PrivacyPolicyPage() {
       <Section id="information-we-collect" title="Information we collect">
         <ul className="list-disc pl-6 space-y-2">
           <li><strong>Account identifiers</strong> — name, email, phone number, role (Super Admin, staff, or Design Partner), and login credentials managed via Firebase Authentication.</li>
+          <li><strong>Sign-in method details</strong> — accounts are invitation-only, and you sign in using one of: <strong>Google Sign-In</strong> (in which case Google shares your name, email address, and profile picture with us), an email address and password, a <strong>phone number with a one-time password (OTP)</strong> sent by SMS, or a one-time invitation link sent to your email address.</li>
           <li><strong>Contact information</strong> — details you submit through the website enquiry form or provide to our showroom staff.</li>
           <li><strong>Business and project records</strong> — leads, selection slips, quotations, orders, referrals, and Design Partner statements created in the course of doing business with us.</li>
-          <li><strong>Photos and videos</strong> — inventory and product images captured by staff, and any samples or reference images shared with us.</li>
+          <li><strong>Photos and videos</strong> — inventory and product images captured by staff, room photographs uploaded by Design Partners for the veneer visualiser, and any samples or reference images shared with us.</li>
           <li><strong>Device and push notification tokens</strong> — used to deliver in-app and push notifications (e.g. quote updates, sample reminders) to staff and Design Partner devices.</li>
           <li><strong>Connected Instagram/Facebook account data</strong> — when a staff member links our business Facebook Page and Instagram Business account via Facebook Login, we receive the Page/Instagram account ID, name, profile picture, and an access token, as described below.</li>
           <li><strong>Diagnostics</strong> — basic crash and error logs, only if diagnostic reporting is enabled, used solely to fix app problems.</li>
+          <li><strong>Website usage data</strong> — if website analytics is enabled, aggregate page-view and interaction statistics collected through Google Analytics (see below). This applies to this website only; the Showroom app contains no analytics software.</li>
+          <li><strong>Referral details</strong> — where you arrived from. If you reach this website through a campaign link, the campaign parameters in that link (<code>utm_source</code>, <code>utm_medium</code>, <code>utm_campaign</code>, <code>utm_content</code>, <code>utm_term</code>), the first page you landed on, and the website that referred you are stored in your own browser and sent to us only if you later submit an enquiry, so we know which campaign it came from.</li>
         </ul>
+      </Section>
+
+      <Section id="analytics-and-storage" title="Website analytics and browser storage">
+        <p>
+          This website may use <strong>Google Analytics 4</strong> to understand how visitors find and use the site —
+          which pages are viewed, and which enquiry forms are used. This is aggregate statistical information about
+          site usage. We do not use it to build advertising profiles, and we do not run advertising or cross-site
+          tracking software on this site.
+        </p>
+        <p>
+          This website also stores the referral details described above in your browser's <strong>local storage</strong>.
+          It stays on your device and is only transmitted to us if you submit an enquiry. You can clear it at any time
+          by clearing your browser's site data for mbrosveneers.com, and you can block analytics using your browser's
+          privacy settings or any content blocker. Neither is required to browse the site or submit an enquiry.
+        </p>
+        <p>
+          The <strong>M Bros Veneers Showroom app does not include Google Analytics, any advertising identifier, or
+          any cross-app tracking software.</strong> This section applies only to the public website.
+        </p>
       </Section>
 
       <Section id="how-we-use-it" title="How we use information">
@@ -123,11 +145,32 @@ export function PrivacyPolicyPage() {
         <p>We do not sell your personal information.</p>
       </Section>
 
+      <Section id="app-permissions" title="Permissions the app asks for">
+        <p>
+          The M Bros Veneers Showroom app requests the following device permissions. Each is requested only at the
+          point you first use the feature that needs it, and you can decline or revoke any of them in your device
+          settings — the rest of the app continues to work.
+        </p>
+        <ul className="list-disc pl-6 space-y-2">
+          <li><strong>Camera</strong> — so staff can photograph newly arrived stock and lot galleries, and so Design Partners can photograph their own wall or room for the veneer visualiser. We do not access the camera in the background.</li>
+          <li><strong>Photo library</strong> — so you can choose an existing photo or video instead of taking a new one. We only receive the specific files you select.</li>
+          <li><strong>Microphone</strong> — only when an authorised staff member records a product video with sound.</li>
+          <li><strong>Notifications</strong> — to deliver the transactional alerts described above. Requested only after you sign in.</li>
+        </ul>
+        <p>
+          The app does not request location, contacts, calendar, health, or any advertising identifier, and contains
+          no advertising or cross-app tracking software.
+        </p>
+      </Section>
+
       <Section id="who-we-share-with" title="Who we share information with">
         <p>We use the following processors to operate our services. Each only receives what it needs to perform its function:</p>
         <ul className="list-disc pl-6 space-y-2">
-          <li><strong>Google Firebase</strong> — authentication and push notifications.</li>
+          <li><strong>Google Firebase</strong> — authentication (including phone/OTP verification) and push notifications.</li>
+          <li><strong>Google Sign-In</strong> — used only to verify the identity of an already-invited account. We receive your name, email address, and profile picture from Google; we never receive your Google password.</li>
+          <li><strong>Google Analytics</strong> — aggregate website usage statistics, on this website only. Not used on the Showroom app.</li>
           <li><strong>Google Cloud Run</strong> — hosting for our backend API.</li>
+          <li><strong>Cloudflare</strong> — website hosting and Turnstile, the anti-spam check on our enquiry forms.</li>
           <li><strong>Cloudflare R2</strong> — storage for product photos and media.</li>
           <li><strong>Meta (WhatsApp Cloud API, Instagram/Facebook Graph API)</strong> — used only for staff-initiated customer notifications and social media posting from business-owned accounts; customer data is not shared with Meta for advertising purposes.</li>
         </ul>

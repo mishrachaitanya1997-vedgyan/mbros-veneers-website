@@ -5,8 +5,8 @@ interface ImportMetaEnv {
   readonly VITE_API_URL?: string;
   /** Cloudflare Turnstile sitekey (public) for the "mbrosveneers-website" widget. */
   readonly VITE_TURNSTILE_SITE_KEY?: string;
-  /** Managed siteverify Worker URL for EmailJS-backed forms (see src/turnstile.ts). */
-  readonly VITE_TURNSTILE_VERIFY_URL?: string;
+  /** GA4 Measurement ID, e.g. G-XXXXXXXXXX. Analytics is skipped entirely when unset. */
+  readonly VITE_GA_MEASUREMENT_ID?: string;
 }
 
 interface ImportMeta {

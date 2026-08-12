@@ -3,6 +3,8 @@
 // VITE_API_URL is unset or a fetch fails, callers fall back to bundled content
 // so the site never depends on the API being up.
 
+import type { Attribution } from '../attribution';
+
 const API_URL = ((import.meta.env.VITE_API_URL as string | undefined) ?? '').replace(/\/$/, '');
 
 export type CatalogCategory = {
@@ -116,6 +118,7 @@ export async function submitPublicLead(input: {
   projectName?: string;
   message: string;
   botToken: string;
+  attribution?: Attribution;
 }): Promise<void> {
   if (!API_URL) throw new Error('VITE_API_URL not configured');
   const res = await fetch(`${API_URL}/public/leads`, {
@@ -128,6 +131,7 @@ export async function submitPublicLead(input: {
       projectName: input.projectName || undefined,
       message: input.message,
       botToken: input.botToken,
+      ...attributionPayload(input.attribution),
     }),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -147,6 +151,7 @@ export async function submitSharedProjectEnquiry(input: {
    * server-side check runs, and the real submission would then always fail.
    */
   botToken: string;
+  attribution?: Attribution;
 }): Promise<void> {
   if (!API_URL) throw new Error('VITE_API_URL not configured');
   const res = await fetch(`${API_URL}/public/leads`, {
@@ -159,7 +164,21 @@ export async function submitSharedProjectEnquiry(input: {
       message: input.message,
       shareToken: input.shareToken,
       botToken: input.botToken,
+      ...attributionPayload(input.attribution),
     }),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
+}
+
+function attributionPayload(attribution?: Attribution) {
+  if (!attribution) return {};
+  return {
+    utmSource: attribution.utmSource,
+    utmMedium: attribution.utmMedium,
+    utmCampaign: attribution.utmCampaign,
+    utmContent: attribution.utmContent,
+    utmTerm: attribution.utmTerm,
+    landingPage: attribution.landingPage,
+    referrerHost: attribution.referrerHost,
+  };
 }

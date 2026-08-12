@@ -21,8 +21,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { EnquiryDialog } from '@/components/EnquiryDialog';
 import { TurnstileWidget } from '@/components/TurnstileWidget';
-import { verifyTurnstileToken } from './turnstile';
 import { submitPublicLead } from './catalog/api';
+import { captureAttribution, getAttribution } from './attribution';
+import { initAnalytics, trackEvent, trackPageView } from './analytics';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -62,7 +63,7 @@ const appointmentSchema = z.object({
 const contactSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
-  phone: z.string().trim().optional(),
+  phone: z.string().trim().min(8, "Invalid phone number"),
   subject: z.string().min(2, "Subject is required"),
   message: z.string().min(10, "Message must be at least 10 characters"),
 });
@@ -221,7 +222,9 @@ const AppointmentDialog = ({ children }: { children: React.ReactElement }) => {
           ? values.message.trim()
           : `Requested a private showroom viewing for ${values.date}.`,
         botToken: turnstileToken,
+        attribution: getAttribution(),
       });
+      trackEvent('generate_lead', { form: 'appointment' });
       await emailjs.send(
         'service_cgxlu6r',
         'template_fppwhse',
@@ -748,24 +751,20 @@ const ContactSection = () => {
       setIsSubmitting(false);
       return;
     }
-    // See EnquiryDialog.tsx for why phone-present and phone-absent take
-    // different verification paths (a Turnstile token is single-use).
-    const phone = values.phone?.trim();
+    // Phone is required on this form, so every submission also creates a CRM
+    // lead -- the token is verified once, server-side, by that call (a
+    // Turnstile token is single-use, so it must not also be verified here).
     try {
-      if (phone) {
-        await submitPublicLead({
-          name: values.name,
-          phone,
-          email: values.email,
-          projectName: values.subject,
-          message: values.message,
-          botToken: turnstileToken,
-        });
-      } else if (!(await verifyTurnstileToken(turnstileToken))) {
-        setSubmitStatus({ type: 'error', message: 'Verification failed. Please complete the checkbox above and try again.' });
-        setIsSubmitting(false);
-        return;
-      }
+      await submitPublicLead({
+        name: values.name,
+        phone: values.phone,
+        email: values.email,
+        projectName: values.subject,
+        message: values.message,
+        botToken: turnstileToken,
+        attribution: getAttribution(),
+      });
+      trackEvent('generate_lead', { form: 'contact' });
       await emailjs.send(
         'service_cgxlu6r',
         'template_5i87ik5',
@@ -836,7 +835,7 @@ const ContactSection = () => {
                     name="phone"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Phone (optional)</FormLabel>
+                        <FormLabel>Phone</FormLabel>
                         <FormControl>
                           <Input placeholder="+91 00000 00000" {...field} className="rounded-none border-wood-light/40 h-12" />
                         </FormControl>
@@ -1028,6 +1027,14 @@ export default function App() {
     applySiteStructuredData(SITE_SETTINGS);
   }, []);
 
+  // First-touch marketing attribution (utm_*, referrer, landing page) --
+  // captured once per browser and replayed on whichever enquiry form the
+  // visitor eventually submits.
+  useEffect(() => {
+    captureAttribution();
+    initAnalytics();
+  }, []);
+
   const isCatalogue = currentPath === '/catalogue' || currentPath.startsWith('/catalogue/');
   // Any /veneers/<slug> renders the category page; unknown slugs get a 404
   // inside it once the live category list has loaded.
@@ -1064,6 +1071,12 @@ export default function App() {
       if (ogDesc) ogDesc.content = HOME_SEO.description;
     }
   }, [isCatalogue, isVeneerPage, isLegalPage, isSharedPage]);
+
+  // GA4 page_view -- sent manually per SPA navigation (see analytics.ts for
+  // why). Runs after the title-update effect above so page_title is current.
+  useEffect(() => {
+    trackPageView(currentPath);
+  }, [currentPath]);
 
   return (
     <div className="min-h-screen selection:bg-gold selection:text-wood-dark">

@@ -24,13 +24,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import emailjs from '@emailjs/browser';
 import { TurnstileWidget } from '@/components/TurnstileWidget';
-import { verifyTurnstileToken } from '@/src/turnstile';
 import { submitPublicLead } from '@/src/catalog/api';
+import { getAttribution } from '@/src/attribution';
+import { trackEvent } from '@/src/analytics';
 
 const contactSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
-  phone: z.string().trim().optional(),
+  phone: z.string().trim().min(8, "Invalid phone number"),
   subject: z.string().min(2, "Subject is required"),
   message: z.string().min(10, "Message must be at least 10 characters"),
 });
@@ -74,28 +75,21 @@ export function EnquiryDialog({ children, defaultMessage = "" }: EnquiryDialogPr
       setIsSubmitting(false);
       return;
     }
-    // Phone is optional here, but it's the only way to also create a CRM
-    // lead (the CRM dedupes contacts on phone). When given, the token is
-    // verified once, server-side, by that lead-creation call -- verifying it
-    // again client-side afterward would fail, since a Turnstile token can
-    // only be redeemed once. When phone is omitted, verify directly against
-    // our own Worker instead, since nothing else will.
-    const phone = values.phone?.trim();
+    // Phone is required, so every enquiry also creates a CRM lead (the CRM
+    // dedupes contacts on phone). The token is verified once, server-side,
+    // by that call -- a Turnstile token is single-use, so it must not also
+    // be verified here.
     try {
-      if (phone) {
-        await submitPublicLead({
-          name: values.name,
-          phone,
-          email: values.email,
-          projectName: values.subject,
-          message: values.message,
-          botToken: turnstileToken,
-        });
-      } else if (!(await verifyTurnstileToken(turnstileToken))) {
-        setSubmitStatus({ type: 'error', message: 'Verification failed. Please complete the checkbox above and try again.' });
-        setIsSubmitting(false);
-        return;
-      }
+      await submitPublicLead({
+        name: values.name,
+        phone: values.phone,
+        email: values.email,
+        projectName: values.subject,
+        message: values.message,
+        botToken: turnstileToken,
+        attribution: getAttribution(),
+      });
+      trackEvent('generate_lead', { form: 'product_enquiry' });
       await emailjs.send(
         'service_cgxlu6r',
         'template_5i87ik5',
@@ -160,7 +154,7 @@ export function EnquiryDialog({ children, defaultMessage = "" }: EnquiryDialogPr
               name="phone"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-wood-dark uppercase tracking-widest text-xs font-bold">Phone (optional)</FormLabel>
+                  <FormLabel className="text-wood-dark uppercase tracking-widest text-xs font-bold">Phone</FormLabel>
                   <FormControl>
                     <Input placeholder="+91 00000 00000" {...field} className="rounded-none border-wood-light/40 bg-white h-12" />
                   </FormControl>
