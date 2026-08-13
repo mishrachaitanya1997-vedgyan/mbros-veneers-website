@@ -44,8 +44,11 @@ function loadTurnstileScript(): Promise<void> {
  */
 export function TurnstileWidget({
   onToken,
+  className,
 }: {
   onToken: (token: string | null) => void;
+  /** Extra classes for the wrapper, e.g. to centre the widget. */
+  className?: string;
 }) {
   const containerId = `turnstile-${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
   const widgetIdRef = useRef<string | null>(null);
@@ -58,6 +61,10 @@ export function TurnstileWidget({
         widgetIdRef.current = window.turnstile.render(`#${containerId}`, {
           sitekey: TURNSTILE_SITE_KEY,
           action: 'turnstile-spin-v1',
+          // Turnstile defaults to a dark widget, which reads as a harsh black
+          // slab against this site's cream/white forms. Light matches the form
+          // surface; the wrapper below softens the remaining hard edge.
+          theme: 'light',
           callback: (token: string) => onToken(token),
           'expired-callback': () => onToken(null),
           'error-callback': () => onToken(null),
@@ -74,5 +81,17 @@ export function TurnstileWidget({
   }, []);
 
   if (!TURNSTILE_SITE_KEY) return null;
-  return <div id={containerId} />;
+  // The inner iframe has its own fixed corners, so the wrapper clips them with
+  // overflow-hidden to get a consistent radius across browsers.
+  return (
+    <div
+      id={containerId}
+      className={[
+        'inline-block overflow-hidden rounded-lg',
+        'ring-1 ring-wood-light/30 shadow-sm',
+        '[&_iframe]:block',
+        className ?? '',
+      ].join(' ')}
+    />
+  );
 }

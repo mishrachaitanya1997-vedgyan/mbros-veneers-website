@@ -871,12 +871,25 @@ const ContactSection = () => {
                   />
                   <TurnstileWidget onToken={setTurnstileToken} />
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                    <Button disabled={isSubmitting || !turnstileToken} type="submit" className="w-full md:w-auto bg-wood-dark text-wood-cream hover:bg-wood-medium rounded-none px-12 py-6 uppercase tracking-widest font-bold">
+                    <Button
+                      disabled={isSubmitting || !turnstileToken}
+                      type="submit"
+                      className="w-full md:w-auto rounded-lg px-12 py-6 bg-wood-dark text-wood-cream font-bold uppercase tracking-widest shadow-sm transition-all duration-300 hover:bg-gold hover:text-wood-dark hover:shadow-md hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-gold focus-visible:ring-offset-2 disabled:opacity-50 disabled:shadow-none disabled:translate-y-0 disabled:cursor-not-allowed"
+                    >
                       {isSubmitting ? "Sending..." : "Send Message"}
                     </Button>
                     {submitStatus.type && (
-                      <div className={`px-4 py-2 text-sm font-medium border-l-4 ${submitStatus.type === 'success' ? 'border-green-500 text-green-700 bg-green-50' : 'border-red-500 text-red-700 bg-red-50'}`}>
-                        {submitStatus.message}
+                      <div
+                        role="status"
+                        aria-live="polite"
+                        className={`flex items-start gap-2 rounded-lg px-4 py-3 text-sm font-medium ring-1 ${
+                          submitStatus.type === 'success'
+                            ? 'bg-green-50 text-green-800 ring-green-200'
+                            : 'bg-red-50 text-red-800 ring-red-200'
+                        }`}
+                      >
+                        <span aria-hidden="true">{submitStatus.type === 'success' ? '✓' : '!'}</span>
+                        <span>{submitStatus.message}</span>
                       </div>
                     )}
                   </div>
