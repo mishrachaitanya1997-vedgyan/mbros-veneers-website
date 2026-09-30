@@ -333,6 +333,10 @@ const Hero = () => {
       <div className="absolute inset-0 z-0">
         <img 
           src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=2064&auto=format&fit=crop" 
+          srcSet="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=768&auto=format&fit=crop 768w,
+                  https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=1280&auto=format&fit=crop 1280w,
+                  https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=2064&auto=format&fit=crop 2064w"
+          sizes="100vw"
           alt="Luxury wood veneer interior showcasing natural grain patterns" 
           className="w-full h-full object-cover scale-105"
           loading="eager"
@@ -340,7 +344,6 @@ const Hero = () => {
           decoding="async"
           width="2064"
           height="1376"
-          referrerPolicy="no-referrer"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
       </div>
@@ -473,9 +476,9 @@ const Showroom = () => {
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
+            initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 1 }}
+            transition={{ duration: 0.6 }}
             viewport={{ once: true }}
           >
             <span className="text-gold uppercase tracking-[0.4em] text-xs font-bold mb-6 block">
@@ -545,9 +548,9 @@ const Showroom = () => {
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1 }}
+            transition={{ duration: 0.6 }}
             viewport={{ once: true }}
             className="relative"
           >
@@ -602,7 +605,7 @@ const ShowroomGallery = () => {
             ease: "linear",
             duration: 40,
           }}
-          // Only render the duplicate set needed for seamless loop
+          style={{ willChange: 'transform' }}
         >
           {[...images, ...images].map((img, index) => (
             <div
@@ -613,7 +616,7 @@ const ShowroomGallery = () => {
                 src={img}
                 alt={`M Bros Veneers Nagpur showroom interior view ${(index % images.length) + 1}`}
                 className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110 opacity-80 group-hover:opacity-100"
-                loading={index >= images.length ? 'lazy' : 'eager'}
+                loading="lazy"
                 decoding="async"
                 referrerPolicy="no-referrer"
               />
@@ -704,9 +707,9 @@ const CuratedPalettes = () => {
           {pallets.map((img, idx) => (
              <motion.div
                key={idx}
-               initial={{ opacity: 0, scale: 0.95 }}
+               initial={{ opacity: 0, scale: 0.97 }}
                whileInView={{ opacity: 1, scale: 1 }}
-               transition={{ duration: 0.8, delay: idx * 0.15 }}
+               transition={{ duration: 0.5, delay: idx * 0.08 }}
                viewport={{ once: true }}
                className="group relative w-full aspect-[4/3] overflow-hidden bg-wood-dark rounded-sm shadow-xl"
              >

@@ -96,10 +96,10 @@ function CatalogueCard({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, delay: index * 0.1, ease: 'easeOut' }}
-      viewport={{ once: true, margin: '-50px' }}
+      transition={{ duration: 0.5, delay: Math.min(index * 0.06, 0.3), ease: 'easeOut' }}
+      viewport={{ once: true, margin: '-30px' }}
       className="group cursor-pointer flex flex-col"
       onClick={onSelect}
     >

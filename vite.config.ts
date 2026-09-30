@@ -17,6 +17,8 @@ export default defineConfig(({mode}) => {
       },
     },
     build: {
+      // Enable CSS code splitting so only the styles needed per page are loaded
+      cssCodeSplit: true,
       rollupOptions: {
         output: {
           manualChunks(id) {
@@ -31,6 +33,18 @@ export default defineConfig(({mode}) => {
             // Radix UI components into their own chunk
             if (id.includes('node_modules/@radix-ui') || id.includes('node_modules/@base-ui')) {
               return 'ui';
+            }
+            // Form-only libraries — not needed until a dialog opens
+            if (id.includes('node_modules/zod') || id.includes('node_modules/react-hook-form') || id.includes('node_modules/@hookform')) {
+              return 'forms';
+            }
+            // React DOM is the heaviest individual vendor — isolate it for caching
+            if (id.includes('node_modules/react-dom')) {
+              return 'react-dom';
+            }
+            // React core
+            if (id.includes('node_modules/react/') || id.includes('node_modules/react-is') || id.includes('node_modules/scheduler')) {
+              return 'react';
             }
             // All other node_modules
             if (id.includes('node_modules')) {

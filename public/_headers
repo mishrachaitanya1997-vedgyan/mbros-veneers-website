@@ -10,13 +10,21 @@
 # Cache static assets aggressively (they're content-hashed by Vite)
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
+  Vary: Accept-Encoding
 
-# Cache public assets (images, fonts, etc.) for 1 week
+# Cache public assets — logo, sitemap, robots
 /logo*
-  Cache-Control: public, max-age=604800
+  Cache-Control: public, max-age=2592000
 
-# Security headers
+/sitemap.xml
+  Cache-Control: public, max-age=86400
+
+/robots.txt
+  Cache-Control: public, max-age=86400
+
+# Security headers (all routes)
 /*
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(self)
